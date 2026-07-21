@@ -2,7 +2,7 @@
 // Aanroepen via Vercel Cron (bijv. maandag 08:00) en doorzetten naar e-mail
 // (Resend) — zie README. Beveiligd met CRON_SECRET of een ingelogde sessie.
 import { NextRequest, NextResponse } from "next/server";
-import { AGENTS, COLUMNS, VALIDATION_QUESTIONS, activeSprint } from "@/lib/content";
+import { AGENTS, COLUMNS, activeSprint } from "@/lib/content";
 import { daysBetween, fmt, todayISO } from "@/lib/dates";
 import { getState } from "@/lib/store";
 
@@ -34,9 +34,9 @@ export async function GET(req: NextRequest) {
     .filter((a) => daysBetween(today, a.milestone.date) >= 0 && daysBetween(today, a.milestone.date) <= 14)
     .map((a) => ({ agent: a.name, milestone: a.milestone.label, datum: fmt(a.milestone.date) }));
 
-  const openVragen = VALIDATION_QUESTIONS.filter(
-    (q) => state.answers[q.id].status !== "beantwoord"
-  ).map((q) => q.question);
+  const openVragen = state.questions
+    .filter((q) => !q.archived && state.answers[q.id]?.status !== "beantwoord")
+    .map((q) => q.question);
 
   const sprint = activeSprint(today);
   const sprintStories = state.stories.filter((s) => s.sprintId === sprint.id);

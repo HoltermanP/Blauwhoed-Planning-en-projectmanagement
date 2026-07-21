@@ -38,6 +38,15 @@ export interface Task {
   done: boolean;
 }
 
+/** Validatievraag — beheerbaar door AI-Group; gearchiveerd = verborgen maar bewaard. */
+export interface Question {
+  id: string;
+  agentId: string;
+  question: string;
+  toelichting: string;
+  archived: boolean;
+}
+
 export type StoryStatus = "todo" | "doing" | "done";
 
 export interface Story {
@@ -55,6 +64,7 @@ export interface PortalState {
   answers: Record<string, Answer>;
   tasks: Task[];
   stories: Story[];
+  questions: Question[];
 }
 
 function defaultState(): PortalState {
@@ -75,7 +85,8 @@ function defaultState(): PortalState {
       done: false,
     }))
   );
-  return { epics, comments: [], answers, tasks, stories: seedStories() };
+  const questions: Question[] = VALIDATION_QUESTIONS.map((q) => ({ ...q, archived: false }));
+  return { epics, comments: [], answers, tasks, stories: seedStories(), questions };
 }
 
 // Eerste aanzet productbacklog: realistische user stories per epic.
@@ -142,6 +153,8 @@ function mergeWithDefaults(raw: Partial<PortalState> | null): PortalState {
     answers: { ...base.answers, ...(raw.answers ?? {}) },
     tasks: withSeeds(raw.tasks, base.tasks),
     stories: withSeeds(raw.stories, base.stories),
+    // Zodra er opgeslagen vragen zijn, zijn die volledig leidend (CRUD door beheerder).
+    questions: raw.questions ?? base.questions,
   };
 }
 

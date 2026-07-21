@@ -70,8 +70,14 @@ export async function saveAnswer(formData: FormData) {
   if (!questionId || !text) return;
 
   const state = await getState();
-  const existing = state.answers[questionId];
-  if (!existing) return;
+  if (!state.questions.some((q) => q.id === questionId)) return;
+  const existing = state.answers[questionId] ?? {
+    questionId,
+    text: "",
+    author: "",
+    status: "open" as AnswerStatus,
+    updatedAt: "",
+  };
   state.answers[questionId] = {
     ...existing,
     text,
@@ -97,6 +103,71 @@ export async function setAnswerStatus(formData: FormData) {
   await saveState(state);
   revalidatePath("/validatie");
   revalidatePath("/");
+}
+
+function revalidateValidatie() {
+  revalidatePath("/validatie");
+  revalidatePath("/");
+}
+
+export async function addQuestion(formData: FormData) {
+  await requireAdmin();
+  const agentId = String(formData.get("agentId") ?? "");
+  const question = String(formData.get("question") ?? "").trim();
+  const toelichting = String(formData.get("toelichting") ?? "").trim();
+  if (!agentId || !question) return;
+
+  const state = await getState();
+  const id = Math.random().toString(36).slice(2, 10);
+  state.questions.push({ id, agentId, question, toelichting, archived: false });
+  state.answers[id] = { questionId: id, text: "", author: "", status: "open", updatedAt: "" };
+  await saveState(state);
+  revalidateValidatie();
+}
+
+export async function updateQuestion(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("questionId") ?? "");
+  const agentId = String(formData.get("agentId") ?? "");
+  const question = String(formData.get("question") ?? "").trim();
+  const toelichting = String(formData.get("toelichting") ?? "").trim();
+
+  const state = await getState();
+  const q = state.questions.find((x) => x.id === id);
+  if (!q || !question) return;
+  if (agentId) q.agentId = agentId;
+  q.question = question;
+  q.toelichting = toelichting;
+  await saveState(state);
+  revalidateValidatie();
+}
+
+/** Archiveren = veilig verwijderen: vraag verdwijnt uit de lijst, antwoord blijft bewaard. */
+export async function setQuestionArchived(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("questionId") ?? "");
+  const archived = String(formData.get("archived")) === "1";
+
+  const state = await getState();
+  const q = state.questions.find((x) => x.id === id);
+  if (!q) return;
+  q.archived = archived;
+  await saveState(state);
+  revalidateValidatie();
+}
+
+/** Definitief verwijderen kan alleen vanuit het archief; wist ook het antwoord. */
+export async function deleteQuestionForever(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("questionId") ?? "");
+
+  const state = await getState();
+  const q = state.questions.find((x) => x.id === id);
+  if (!q || !q.archived) return;
+  state.questions = state.questions.filter((x) => x.id !== id);
+  delete state.answers[id];
+  await saveState(state);
+  revalidateValidatie();
 }
 
 function revalidateBoard(agentId: string) {

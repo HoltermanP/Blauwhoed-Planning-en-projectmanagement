@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AGENTS, COLUMNS, PROJECT, VALIDATION_QUESTIONS, activeSprint, agentById } from "@/lib/content";
+import { AGENTS, COLUMNS, PROJECT, activeSprint, agentById } from "@/lib/content";
 import { daysBetween, fmt, fmtDateTime, progressPct, todayISO } from "@/lib/dates";
 import { getState } from "@/lib/store";
 import { Progress, RiskBadge } from "@/components/ui";
@@ -18,8 +18,9 @@ export default async function Dashboard() {
   const daysLeft = Math.max(0, daysBetween(today, PROJECT.bouwEind));
 
   const sprint = activeSprint(today);
-  const answered = Object.values(state.answers).filter((a) => a.status === "beantwoord").length;
-  const inProgress = Object.values(state.answers).filter((a) => a.status === "in-behandeling").length;
+  const questions = state.questions.filter((q) => !q.archived);
+  const answered = questions.filter((q) => state.answers[q.id]?.status === "beantwoord").length;
+  const inProgress = questions.filter((q) => state.answers[q.id]?.status === "in-behandeling").length;
   const recentComments = [...state.comments].reverse().slice(0, 4);
 
   return (
@@ -118,11 +119,11 @@ export default async function Dashboard() {
         <div className="card">
           <h2 style={{ marginTop: 0 }}>Validatievragen</h2>
           <p style={{ fontSize: 14, color: "var(--ink-2)" }}>
-            {answered} van {VALIDATION_QUESTIONS.length} beantwoord
+            {answered} van {questions.length} beantwoord
             {inProgress > 0 && <> · {inProgress} in behandeling</>}.
             Input van Daphne &amp; Lise (OM Acquisitie) stuurt de designfase direct aan.
           </p>
-          <Progress pct={Math.round((answered / VALIDATION_QUESTIONS.length) * 100)} />
+          <Progress pct={questions.length ? Math.round((answered / questions.length) * 100) : 0} />
           <p style={{ marginTop: 12 }}>
             <Link href="/validatie">Naar de validatievragen →</Link>
           </p>
