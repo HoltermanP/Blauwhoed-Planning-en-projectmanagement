@@ -1,0 +1,301 @@
+/* Blauwhoed Portal — designsysteem.
+   Modern-zakelijk: donkere navy-sidebar, hero-headers met skyline-motief,
+   zachte kaarten. Kleurrollen volgen het gevalideerde referentiepalet:
+   status = good/warning/critical met icoon + label, nooit kleur alleen;
+   fasekleuren = ordinale blauw-ramp. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  color-scheme: light;
+  --page: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #0b1524;
+  --ink-2: #4b5563;
+  --muted: #8a8f98;
+  --grid: #e5e7eb;
+  --baseline: #cbd2da;
+  --border: rgba(11, 21, 36, 0.08);
+  --shadow: 0 1px 2px rgba(11, 21, 36, 0.04), 0 8px 24px -12px rgba(11, 21, 36, 0.12);
+
+  --navy: #0e1e33;
+  --navy-2: #16304f;
+  --brand: #2a78d6;
+  --brand-ink: #1c5cab;
+  --brand-wash: #e3eefb;
+
+  --phase-design: #86b6ef;
+  --phase-build: #5598e7;
+  --phase-test: #2a78d6;
+  --phase-deploy: #184f95;
+
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-critical: #d03b3b;
+  --good-text: #006300;
+  --warning-text: #8a5a00;
+  --critical-text: #a32e2e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0f13;
+    --surface: #171a20;
+    --ink: #f3f4f6;
+    --ink-2: #c0c5cd;
+    --muted: #8a8f98;
+    --grid: #262a32;
+    --baseline: #3a3f49;
+    --border: rgba(255, 255, 255, 0.09);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+
+    --navy: #0b1828;
+    --navy-2: #142842;
+    --brand: #3987e5;
+    --brand-ink: #86b6ef;
+    --brand-wash: #12304f;
+
+    --phase-test: #3987e5;
+    --phase-deploy: #86b6ef;
+
+    --good-text: #0ca30c;
+    --warning-text: #fab219;
+    --critical-text: #e66767;
+  }
+  .gantt-bar { color: #0b1524; }
+}
+
+html { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+body { background: var(--page); color: var(--ink); line-height: 1.55; }
+a { color: var(--brand-ink); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Shell ---------- */
+.shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 236px; flex-shrink: 0;
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+  color: #dbe4f0;
+  padding: 22px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  position: sticky; top: 0; height: 100vh;
+}
+.sidebar .logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 15.5px; color: #fff; letter-spacing: -0.01em;
+}
+.sidebar .tagline { font-size: 11.5px; color: #8fa5c2; margin: 6px 0 22px 40px; }
+.sidebar nav { display: flex; flex-direction: column; gap: 3px; }
+.sidebar nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 9px; color: #b9c8dd;
+  font-size: 13.5px; font-weight: 500;
+}
+.sidebar nav a svg { flex-shrink: 0; opacity: 0.85; }
+.sidebar nav a:hover { background: rgba(255, 255, 255, 0.07); color: #fff; text-decoration: none; }
+.sidebar nav a.active { background: var(--brand); color: #fff; box-shadow: 0 4px 14px -4px rgba(42, 120, 214, 0.55); }
+.sidebar .foot { margin-top: auto; font-size: 12px; color: #8fa5c2; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 14px; }
+.rolebadge {
+  display: inline-block; font-size: 11.5px; font-weight: 600;
+  padding: 3px 10px; border-radius: 999px;
+  color: #dbe4f0; background: rgba(255, 255, 255, 0.1); margin-bottom: 8px;
+}
+.btn-link { background: none; border: none; color: #8fa5c2; cursor: pointer; font-size: 12.5px; padding: 0; }
+.btn-link:hover { color: #fff; text-decoration: underline; }
+.main { flex: 1; padding: 26px 34px 64px; max-width: 1220px; min-width: 0; }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; overflow: hidden;
+  background: linear-gradient(120deg, var(--navy) 20%, #1c5cab 85%, #2a78d6 100%);
+  color: #fff; border-radius: 18px;
+  padding: 38px 34px 42px;
+  margin-bottom: 26px;
+  box-shadow: var(--shadow);
+}
+.hero h1 { font-size: 28px; letter-spacing: -0.02em; margin-bottom: 6px; text-shadow: 0 1px 12px rgba(5, 12, 24, 0.45); }
+.hero-intro { font-size: 14.5px; color: #d6e2f2; max-width: 640px; text-shadow: 0 1px 8px rgba(5, 12, 24, 0.5); }
+.hero-content { position: relative; z-index: 1; }
+.hero-art {
+  position: absolute; right: -10px; bottom: -6px; height: 100%; max-height: 150px;
+  width: auto; color: #ffffff; opacity: 0.14; pointer-events: none;
+}
+.hero-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.hero-chip {
+  font-size: 12.5px; font-weight: 600; padding: 5px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13); color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ---------- Typografie ---------- */
+h1 { font-size: 26px; letter-spacing: -0.02em; }
+h2 { font-size: 17px; margin: 30px 0 12px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 9px; }
+h2::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--brand); flex-shrink: 0; }
+.sub { color: var(--ink-2); font-size: 14px; margin-bottom: 20px; }
+
+/* ---------- Kaarten & grids ---------- */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px; box-shadow: var(--shadow);
+}
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 900px) {
+  .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .shell { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; }
+  .main { padding: 20px 16px 48px; }
+  .hero { padding: 24px 20px; }
+}
+
+.stat-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.stat-value { font-size: 30px; font-weight: 700; margin: 4px 0 2px; letter-spacing: -0.02em; }
+.stat-hint { font-size: 13px; color: var(--ink-2); }
+
+/* ---------- Voortgangsbalk ---------- */
+.progress { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+.progress > div { height: 100%; background: linear-gradient(90deg, var(--brand), #5598e7); border-radius: 4px; }
+.progress-sm { height: 5px; margin-top: 8px; }
+
+/* ---------- Statusbadges (icoon + label, nooit kleur alleen) ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 3.5px 11px;
+  border-radius: 999px; border: 1px solid var(--border); background: var(--page);
+}
+.badge .dot { font-size: 10px; line-height: 1; }
+.badge-good { color: var(--good-text); }
+.badge-good .dot { color: var(--status-good); }
+.badge-warning { color: var(--warning-text); }
+.badge-warning .dot { color: var(--status-warning); }
+.badge-critical { color: var(--critical-text); }
+.badge-critical .dot { color: var(--status-critical); }
+.badge-neutral { color: var(--ink-2); }
+
+/* ---------- Tabellen ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--baseline); }
+td { padding: 12px 14px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+.table-wrap { overflow-x: auto; }
+
+/* ---------- Gantt ---------- */
+.gantt { position: relative; }
+.gantt-months { display: flex; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--baseline); padding-bottom: 5px; margin-left: 210px; position: relative; }
+.gantt-row { display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--grid); }
+.gantt-row:last-child { border-bottom: none; }
+.gantt-label { width: 210px; flex-shrink: 0; font-size: 13px; font-weight: 600; padding-right: 12px; display: flex; align-items: center; gap: 8px; }
+.gantt-label a { color: var(--ink); }
+.gantt-label svg { color: var(--brand); flex-shrink: 0; }
+.gantt-track { position: relative; flex: 1; height: 28px; }
+.gantt-bar {
+  position: absolute; top: 4px; height: 20px; border-radius: 5px;
+  font-size: 10.5px; font-weight: 600; color: #fff;
+  display: flex; align-items: center; padding: 0 7px;
+  overflow: hidden; white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--surface); /* 2px surface-gap tussen fases */
+}
+.gantt-milestone {
+  position: absolute; top: 7px; width: 12px; height: 12px;
+  background: var(--ink); transform: rotate(45deg); border-radius: 2px;
+}
+.gantt-gridline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--grid); }
+.gantt-today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--status-critical); }
+.gantt-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 12.5px; color: var(--ink-2); }
+.gantt-legend .chip { display: inline-block; width: 14px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: baseline; }
+
+/* ---------- Kanban ---------- */
+.kanban { display: grid; grid-template-columns: repeat(6, minmax(196px, 1fr)); gap: 12px; overflow-x: auto; align-items: start; padding-bottom: 6px; }
+@media (max-width: 1100px) { .kanban { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px) { .kanban { grid-template-columns: 1fr; } }
+.kanban-col { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; min-height: 140px; box-shadow: var(--shadow); }
+.kanban-col h3 { font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; color: var(--ink-2); }
+.kanban-col .hint { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+.kanban-card {
+  background: var(--page); border: 1px solid var(--border); border-radius: 11px;
+  padding: 13px; margin-bottom: 10px;
+}
+.kanban-card .cardhead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.kanban-card .cardhead svg { color: var(--brand); flex-shrink: 0; }
+.kanban-card .name { font-size: 13.5px; font-weight: 700; }
+.kanban-card .name a { color: var(--ink); }
+.kanban-card .name a:hover { color: var(--brand-ink); }
+.kanban-card .meta { font-size: 12px; color: var(--ink-2); margin-bottom: 9px; }
+.kanban-card .deadline { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+.kanban-card .taskline { font-size: 11.5px; color: var(--ink-2); margin-top: 8px; }
+.kanban-move { display: flex; gap: 6px; margin-top: 10px; }
+.kanban-move button {
+  flex: 1; padding: 4px 0; font-size: 12px; font-weight: 700;
+  background: var(--surface); color: var(--ink-2);
+  border: 1px solid var(--baseline); border-radius: 7px; cursor: pointer;
+}
+.kanban-move button:hover:not(:disabled) { border-color: var(--brand); color: var(--brand-ink); }
+.kanban-move button:disabled { opacity: 0.35; cursor: default; }
+
+/* ---------- Taken ---------- */
+.task { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--grid); }
+.task:last-of-type { border-bottom: none; }
+.task-check {
+  width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+  border: 1.5px solid var(--baseline); background: var(--surface);
+  cursor: pointer; font-size: 12px; line-height: 1; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.task-check.done { background: var(--status-good); border-color: var(--status-good); }
+.task-title { font-size: 14px; flex: 1; }
+.task-title.done { color: var(--muted); text-decoration: line-through; }
+.task-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 2px 6px; border-radius: 6px; }
+.task-del:hover { color: var(--critical-text); background: var(--page); }
+.task-add { display: flex; gap: 8px; margin-top: 12px; }
+.task-add input { flex: 1; }
+.task-add .btn { margin-top: 0; }
+
+/* ---------- Formulieren ---------- */
+input[type="text"], input[type="password"], textarea, select {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--baseline);
+  border-radius: 9px; font: inherit; font-size: 14px;
+  background: var(--surface); color: var(--ink);
+}
+textarea { min-height: 90px; resize: vertical; }
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: var(--brand); }
+label { font-size: 13px; font-weight: 600; color: var(--ink-2); display: block; margin: 12px 0 4px; }
+.btn {
+  display: inline-block; margin-top: 12px; padding: 9px 20px;
+  background: var(--brand); color: #fff; border: none; border-radius: 9px;
+  font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 14px -6px rgba(42, 120, 214, 0.6);
+}
+.btn:hover { background: var(--brand-ink); }
+.btn-secondary { background: var(--page); color: var(--ink-2); border: 1px solid var(--baseline); box-shadow: none; }
+.btn-secondary:hover { background: var(--grid); color: var(--ink); }
+
+/* ---------- Comments ---------- */
+.comment { border-top: 1px solid var(--grid); padding: 12px 0; }
+.comment:first-of-type { border-top: none; }
+.comment .who { font-size: 13px; font-weight: 700; }
+.comment .when { font-size: 12px; color: var(--muted); margin-left: 8px; font-weight: 400; }
+.comment p { font-size: 14px; color: var(--ink-2); margin-top: 4px; white-space: pre-wrap; }
+
+.notice {
+  border-left: 3px solid var(--brand); background: var(--brand-wash);
+  color: var(--ink); padding: 13px 16px; border-radius: 0 10px 10px 0;
+  font-size: 13.5px; margin: 16px 0;
+}
+.error-box {
+  border-left: 3px solid var(--status-critical); background: var(--surface);
+  color: var(--critical-text); padding: 11px 16px; border-radius: 0 10px 10px 0;
+  font-size: 14px; margin-bottom: 14px;
+}
+
+/* ---------- Login ---------- */
+.login-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(42, 120, 214, 0.25), transparent 60%),
+    linear-gradient(180deg, rgba(9, 20, 36, 0.90) 0%, rgba(14, 30, 51, 0.86) 100%),
+    url("/img/hero-film.jpg") center / cover no-repeat;
+  padding: 20px; position: relative; overflow: hidden;
+}
+.login-skyline { position: absolute; bottom: 0; left: 0; right: 0; width: 100%; height: 180px; color: #fff; opacity: 0.08; }
+.login-card { width: 100%; max-width: 410px; position: relative; z-index: 1; border: none; }
