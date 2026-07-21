@@ -3,8 +3,8 @@
 // - Zonder: lokaal bestand .data/state.json (alleen geschikt voor development).
 import { promises as fs } from "fs";
 import path from "path";
-import type { Column, Risk } from "./content";
-import { AGENTS, VALIDATION_QUESTIONS } from "./content";
+import type { Column, DocStatus, Risk } from "./content";
+import { AGENTS, DOCUMENTS, VALIDATION_QUESTIONS } from "./content";
 
 export interface Comment {
   id: string;
@@ -47,6 +47,25 @@ export interface Question {
   archived: boolean;
 }
 
+export interface DocFile {
+  name: string;
+  size: number;
+  type: string;
+  uploadedAt: string;
+}
+
+/** Document in de documenten-hub — beheerbaar door AI-Group. */
+export interface DocItem {
+  id: string;
+  titel: string;
+  versie: string;
+  datum: string; // ISO
+  eigenaar: string;
+  status: DocStatus;
+  changelog: string;
+  file?: DocFile;
+}
+
 export type StoryStatus = "todo" | "doing" | "done";
 
 export interface Story {
@@ -65,6 +84,7 @@ export interface PortalState {
   tasks: Task[];
   stories: Story[];
   questions: Question[];
+  docs: DocItem[];
 }
 
 function defaultState(): PortalState {
@@ -86,7 +106,8 @@ function defaultState(): PortalState {
     }))
   );
   const questions: Question[] = VALIDATION_QUESTIONS.map((q) => ({ ...q, archived: false }));
-  return { epics, comments: [], answers, tasks, stories: seedStories(), questions };
+  const docs: DocItem[] = DOCUMENTS.map((d) => ({ ...d }));
+  return { epics, comments: [], answers, tasks, stories: seedStories(), questions, docs };
 }
 
 // Eerste aanzet productbacklog: realistische user stories per epic.
@@ -153,8 +174,9 @@ function mergeWithDefaults(raw: Partial<PortalState> | null): PortalState {
     answers: { ...base.answers, ...(raw.answers ?? {}) },
     tasks: withSeeds(raw.tasks, base.tasks),
     stories: withSeeds(raw.stories, base.stories),
-    // Zodra er opgeslagen vragen zijn, zijn die volledig leidend (CRUD door beheerder).
+    // Zodra er opgeslagen vragen/documenten zijn, zijn die volledig leidend (CRUD door beheerder).
     questions: raw.questions ?? base.questions,
+    docs: raw.docs ?? base.docs,
   };
 }
 

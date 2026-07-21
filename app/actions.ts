@@ -11,7 +11,8 @@ import {
   requireRole,
 } from "@/lib/auth";
 import { getState, saveState, type AnswerStatus, type StoryStatus } from "@/lib/store";
-import { COLUMNS, SPRINTS, type Column, type Risk } from "@/lib/content";
+import { COLUMNS, SPRINTS, type Column, type DocStatus, type Risk } from "@/lib/content";
+import { deleteUpload, saveUpload } from "@/lib/files";
 
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -103,6 +104,72 @@ export async function setAnswerStatus(formData: FormData) {
   await saveState(state);
   revalidatePath("/validatie");
   revalidatePath("/");
+}
+
+const DOC_STATUSES: DocStatus[] = ["concept", "review", "goedgekeurd"];
+
+/** Document toevoegen of bewerken; met optioneel (vervangend) bestand. */
+export async function saveDoc(formData: FormData) {
+  await requireAdmin();
+  const docId = String(formData.get("docId") ?? "");
+  const titel = String(formData.get("titel") ?? "").trim();
+  const versie = String(formData.get("versie") ?? "").trim();
+  const datum = String(formData.get("datum") ?? "").trim();
+  const eigenaar = String(formData.get("eigenaar") ?? "").trim();
+  const status = String(formData.get("status") ?? "") as DocStatus;
+  const changelog = String(formData.get("changelog") ?? "").trim();
+  const file = formData.get("file");
+  if (!titel || !DOC_STATUSES.includes(status)) return;
+
+  const state = await getState();
+  let doc = docId ? state.docs.find((d) => d.id === docId) : undefined;
+  if (docId && !doc) return;
+  if (!doc) {
+    doc = {
+      id: Math.random().toString(36).slice(2, 10),
+      titel, versie, datum, eigenaar, status, changelog,
+    };
+    state.docs.push(doc);
+  } else {
+    doc.titel = titel;
+    doc.versie = versie;
+    doc.datum = datum;
+    doc.eigenaar = eigenaar;
+    doc.status = status;
+    doc.changelog = changelog;
+  }
+
+  if (file instanceof File && file.size > 0) {
+    if (doc.file) await deleteUpload(doc.id, doc.file.name);
+    doc.file = await saveUpload(doc.id, file);
+  }
+
+  await saveState(state);
+  revalidatePath("/documenten");
+}
+
+export async function deleteDoc(formData: FormData) {
+  await requireAdmin();
+  const docId = String(formData.get("docId") ?? "");
+  const state = await getState();
+  const doc = state.docs.find((d) => d.id === docId);
+  if (!doc) return;
+  if (doc.file) await deleteUpload(doc.id, doc.file.name);
+  state.docs = state.docs.filter((d) => d.id !== docId);
+  await saveState(state);
+  revalidatePath("/documenten");
+}
+
+export async function removeDocFile(formData: FormData) {
+  await requireAdmin();
+  const docId = String(formData.get("docId") ?? "");
+  const state = await getState();
+  const doc = state.docs.find((d) => d.id === docId);
+  if (!doc?.file) return;
+  await deleteUpload(doc.id, doc.file.name);
+  delete doc.file;
+  await saveState(state);
+  revalidatePath("/documenten");
 }
 
 function revalidateValidatie() {
