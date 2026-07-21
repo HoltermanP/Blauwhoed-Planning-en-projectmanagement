@@ -47,6 +47,7 @@ export default async function Roadmap() {
 
       <div className="card">
         <div className="gantt">
+          <div className="gantt-inner">
           <div className="gantt-months">
             <span>juli</span>
             {MONTH_MARKS.map((m) => (
@@ -91,6 +92,7 @@ export default async function Roadmap() {
               </div>
             </div>
           ))}
+          </div>
         </div>
 
         <div className="gantt-legend">
