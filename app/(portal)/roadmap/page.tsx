@@ -66,7 +66,7 @@ export default async function Roadmap() {
               {SPRINTS.map((sp, i) => (
                 <Link
                   key={sp.id}
-                  href="/sprints"
+                  href={`/sprints?sprint=${sp.id}#sprint-${sp.id}`}
                   className={`gantt-sprint${i % 2 ? " alt" : ""}`}
                   style={{
                     left: `${leftPct(sp.start)}%`,
@@ -142,7 +142,9 @@ export default async function Roadmap() {
               const isActive = today >= sp.start && today <= sp.end;
               return (
                 <div className={`phase-row${isActive ? " phase-active" : today > sp.end ? " phase-done" : " phase-planned"}`} key={sp.id}>
-                  <span className="phase-name">{sp.naam}</span>
+                  <span className="phase-name">
+                    <Link href={`/sprints?sprint=${sp.id}#sprint-${sp.id}`}>{sp.naam}</Link>
+                  </span>
                   <span className="phase-dates">
                     {fmtShort(sp.start)} – {fmtShort(sp.end)}
                     {isActive && " · actief"}

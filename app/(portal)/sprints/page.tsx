@@ -72,7 +72,12 @@ function SprintBoard({ stories, isAdmin }: { stories: Story[]; isAdmin: boolean 
   );
 }
 
-export default async function Sprints() {
+export default async function Sprints({
+  searchParams,
+}: {
+  searchParams: Promise<{ sprint?: string }>;
+}) {
+  const { sprint: focusId } = await searchParams;
   const state = await getState();
   const role = await currentRole();
   const isAdmin = role === "admin";
@@ -101,7 +106,7 @@ export default async function Sprints() {
         </div>
       </PageHeader>
 
-      <h2>
+      <h2 id={`sprint-${active.id}`} style={{ scrollMarginTop: 90 }}>
         {active.naam} — actieve sprint ({fmtShort(active.start)} – {fmtShort(active.end)})
       </h2>
       <p className="sub" style={{ marginBottom: 12 }}>
@@ -204,7 +209,13 @@ export default async function Sprints() {
         const done = items.filter((s) => s.status === "done");
         const past = today > sp.end;
         return (
-          <details className="kb-sec" key={sp.id} style={{ marginBottom: 10 }}>
+          <details
+            className="kb-sec"
+            key={sp.id}
+            id={`sprint-${sp.id}`}
+            open={sp.id === focusId}
+            style={{ marginBottom: 10, scrollMarginTop: 90 }}
+          >
             <summary>
               <span>
                 {sp.naam} · {fmtShort(sp.start)} – {fmtShort(sp.end)}
