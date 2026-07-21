@@ -205,6 +205,36 @@ export const AGENTS: Agent[] = [
   },
 ];
 
+// Sprints van 2 weken over de Bouwfase; sprint 7 is een korte opleversprint.
+export interface Sprint {
+  id: string;
+  naam: string;
+  start: string;
+  end: string;
+  doel: string;
+}
+
+export const SPRINTS: Sprint[] = [
+  { id: "s1", naam: "Sprint 1", start: "2026-07-20", end: "2026-08-02", doel: "Design van alle agents en validatie met OM Acquisitie" },
+  { id: "s2", naam: "Sprint 2", start: "2026-08-03", end: "2026-08-16", doel: "Eerste builds Tender Analyse- en Schrijf-agent; datalogging Learning-agent live" },
+  { id: "s3", naam: "Sprint 3", start: "2026-08-17", end: "2026-08-30", doel: "Build kernagents; start Structuur- en Juridische-agent" },
+  { id: "s4", naam: "Sprint 4", start: "2026-08-31", end: "2026-09-13", doel: "Build afronden Tender Analyse; eerste keten-integraties" },
+  { id: "s5", naam: "Sprint 5", start: "2026-09-14", end: "2026-09-27", doel: "Test & livegang Tender Analyse en Schrijf; build Toets-agent" },
+  { id: "s6", naam: "Sprint 6", start: "2026-09-28", end: "2026-10-11", doel: "Testen Toets- en Juridische-agent; UAT-voorbereiding; Academy vullen" },
+  { id: "s7", naam: "Sprint 7", start: "2026-10-12", end: "2026-10-19", doel: "Opleversprint: integratie Learning-agent, acceptatie en training" },
+];
+
+export function activeSprint(todayIso: string): Sprint {
+  return (
+    SPRINTS.find((s) => todayIso >= s.start && todayIso <= s.end) ??
+    (todayIso < SPRINTS[0].start ? SPRINTS[0] : SPRINTS[SPRINTS.length - 1])
+  );
+}
+
+export function sprintById(id: string): Sprint | undefined {
+  return SPRINTS.find((s) => s.id === id);
+}
+
 export interface ValidationQuestion {
   id: string;
   agentId: string;

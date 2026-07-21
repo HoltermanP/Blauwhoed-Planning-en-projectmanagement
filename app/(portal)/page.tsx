@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AGENTS, COLUMNS, PROJECT, VALIDATION_QUESTIONS, agentById } from "@/lib/content";
+import { AGENTS, COLUMNS, PROJECT, VALIDATION_QUESTIONS, activeSprint, agentById } from "@/lib/content";
 import { daysBetween, fmt, fmtDateTime, progressPct, todayISO } from "@/lib/dates";
 import { getState } from "@/lib/store";
 import { Progress, RiskBadge } from "@/components/ui";
@@ -17,6 +17,7 @@ export default async function Dashboard() {
   const pct = progressPct(PROJECT.bouwStart, PROJECT.bouwEind);
   const daysLeft = Math.max(0, daysBetween(today, PROJECT.bouwEind));
 
+  const sprint = activeSprint(today);
   const answered = Object.values(state.answers).filter((a) => a.status === "beantwoord").length;
   const inProgress = Object.values(state.answers).filter((a) => a.status === "in-behandeling").length;
   const recentComments = [...state.comments].reverse().slice(0, 4);
@@ -30,6 +31,7 @@ export default async function Dashboard() {
       >
         <div className="hero-chips">
           <span className="hero-chip">Bouwfase · dag {dayNr} van {totalDays}</span>
+          <span className="hero-chip">{sprint.naam} · t/m {fmt(sprint.end).replace(" 2026", "")}</span>
           <span className="hero-chip">Oplevering: {fmt(PROJECT.bouwEind)}</span>
           <span className="hero-chip">Beheerfase vanaf {fmt(PROJECT.beheerStart)}</span>
         </div>
@@ -151,7 +153,8 @@ export default async function Dashboard() {
       <div className="notice">
         <strong>Snel naar:</strong>{" "}
         <Link href="/roadmap">Roadmap</Link> · <Link href="/scrumbord">Scrumbord</Link> ·{" "}
-        <Link href="/documenten">Documenten</Link> · <Link href="/sla">SLA &amp; Beheer</Link>
+        <Link href="/sprints">Sprintplanning</Link> · <Link href="/documenten">Documenten</Link> ·{" "}
+        <Link href="/sla">SLA &amp; Beheer</Link>
       </div>
     </>
   );

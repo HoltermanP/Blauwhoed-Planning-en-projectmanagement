@@ -10,8 +10,8 @@ import {
   requireAdmin,
   requireRole,
 } from "@/lib/auth";
-import { getState, saveState, type AnswerStatus } from "@/lib/store";
-import { COLUMNS, type Column, type Risk } from "@/lib/content";
+import { getState, saveState, type AnswerStatus, type StoryStatus } from "@/lib/store";
+import { COLUMNS, SPRINTS, type Column, type Risk } from "@/lib/content";
 
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -160,6 +160,76 @@ export async function deleteTask(formData: FormData) {
   state.tasks = state.tasks.filter((t) => t.id !== taskId);
   await saveState(state);
   revalidateBoard(task.agentId);
+}
+
+function revalidateSprints() {
+  revalidatePath("/sprints");
+  revalidatePath("/roadmap");
+  revalidatePath("/");
+}
+
+export async function addStory(formData: FormData) {
+  await requireAdmin();
+  const agentId = String(formData.get("agentId") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const pointsRaw = Number(formData.get("points"));
+  if (!agentId || !title) return;
+
+  const state = await getState();
+  state.stories.push({
+    id: Math.random().toString(36).slice(2, 10),
+    agentId,
+    title,
+    points: Number.isFinite(pointsRaw) && pointsRaw > 0 ? pointsRaw : undefined,
+    sprintId: null,
+    status: "todo",
+  });
+  await saveState(state);
+  revalidateSprints();
+}
+
+/** Story plannen in een sprint, of terug naar de backlog ("backlog"). */
+export async function planStory(formData: FormData) {
+  await requireAdmin();
+  const storyId = String(formData.get("storyId") ?? "");
+  const target = String(formData.get("sprintId") ?? "");
+
+  const state = await getState();
+  const story = state.stories.find((s) => s.id === storyId);
+  if (!story) return;
+  if (target === "backlog") {
+    story.sprintId = null;
+    story.status = "todo";
+  } else if (SPRINTS.some((s) => s.id === target)) {
+    story.sprintId = target;
+  } else {
+    return;
+  }
+  await saveState(state);
+  revalidateSprints();
+}
+
+export async function setStoryStatus(formData: FormData) {
+  await requireAdmin();
+  const storyId = String(formData.get("storyId") ?? "");
+  const status = String(formData.get("status") ?? "") as StoryStatus;
+  if (!["todo", "doing", "done"].includes(status)) return;
+
+  const state = await getState();
+  const story = state.stories.find((s) => s.id === storyId);
+  if (!story) return;
+  story.status = status;
+  await saveState(state);
+  revalidateSprints();
+}
+
+export async function deleteStory(formData: FormData) {
+  await requireAdmin();
+  const storyId = String(formData.get("storyId") ?? "");
+  const state = await getState();
+  state.stories = state.stories.filter((s) => s.id !== storyId);
+  await saveState(state);
+  revalidateSprints();
 }
 
 export async function updateEpic(formData: FormData) {

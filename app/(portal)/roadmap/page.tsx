@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AGENTS, PROJECT, agentById } from "@/lib/content";
+import { AGENTS, PROJECT, SPRINTS, agentById } from "@/lib/content";
 import { daysBetween, fmt, fmtShort, todayISO } from "@/lib/dates";
 import { getState } from "@/lib/store";
 import { RiskBadge } from "@/components/ui";
@@ -58,6 +58,31 @@ export default async function Roadmap() {
             ))}
           </div>
 
+          <div className="gantt-row gantt-sprintrow">
+            <div className="gantt-label">
+              <Link href="/sprints">Sprints</Link>
+            </div>
+            <div className="gantt-track">
+              {SPRINTS.map((sp, i) => (
+                <Link
+                  key={sp.id}
+                  href="/sprints"
+                  className={`gantt-sprint${i % 2 ? " alt" : ""}`}
+                  style={{
+                    left: `${leftPct(sp.start)}%`,
+                    width: `${widthPct(sp.start, sp.end)}%`,
+                  }}
+                  title={`${sp.naam}: ${fmtShort(sp.start)} – ${fmtShort(sp.end)} — ${sp.doel}`}
+                >
+                  S{i + 1}
+                </Link>
+              ))}
+              {todayLeft >= 0 && todayLeft <= 100 && (
+                <div className="gantt-today" style={{ left: `${todayLeft}%` }} />
+              )}
+            </div>
+          </div>
+
           {AGENTS.map((a) => (
             <div className="gantt-row" key={a.id}>
               <div className="gantt-label">
@@ -106,8 +131,28 @@ export default async function Roadmap() {
         </div>
       </div>
 
-      {/* Mobiel: fasen-tijdlijn per agent */}
+      {/* Mobiel: sprints + fasen-tijdlijn per agent */}
       <div className="mobile-only agent-cardlist">
+        <div className="arow">
+          <div className="top">
+            <Link href="/sprints">Sprints (2 weken)</Link>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            {SPRINTS.map((sp) => {
+              const isActive = today >= sp.start && today <= sp.end;
+              return (
+                <div className={`phase-row${isActive ? " phase-active" : today > sp.end ? " phase-done" : " phase-planned"}`} key={sp.id}>
+                  <span className="phase-name">{sp.naam}</span>
+                  <span className="phase-dates">
+                    {fmtShort(sp.start)} – {fmtShort(sp.end)}
+                    {isActive && " · actief"}
+                    {today > sp.end && " · ✓"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
         {AGENTS.map((a) => (
           <div className="arow" key={a.id}>
             <div className="top">

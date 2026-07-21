@@ -38,11 +38,23 @@ export interface Task {
   done: boolean;
 }
 
+export type StoryStatus = "todo" | "doing" | "done";
+
+export interface Story {
+  id: string;
+  agentId: string; // epic
+  title: string;
+  points?: number;
+  sprintId: string | null; // null = backlog
+  status: StoryStatus;
+}
+
 export interface PortalState {
   epics: Record<string, EpicState>;
   comments: Comment[];
   answers: Record<string, Answer>;
   tasks: Task[];
+  stories: Story[];
 }
 
 function defaultState(): PortalState {
@@ -63,7 +75,49 @@ function defaultState(): PortalState {
       done: false,
     }))
   );
-  return { epics, comments: [], answers, tasks };
+  return { epics, comments: [], answers, tasks, stories: seedStories() };
+}
+
+// Eerste aanzet productbacklog: realistische user stories per epic.
+// Alles start in de backlog (sprintId: null); per sprintplanning worden
+// stories aan een sprint toegewezen.
+function seedStories(): Story[] {
+  const s = (id: string, agentId: string, title: string, points?: number): Story => ({
+    id, agentId, title, points, sprintId: null, status: "todo",
+  });
+  return [
+    // Tender Analyse-agent
+    s("st-ta-1", "tender-analyse", "Als acquisitiemedewerker wil ik een tenderset (PDF's) kunnen uploaden zodat de agent eisen, voorwaarden en criteria automatisch extraheert.", 8),
+    s("st-ta-2", "tender-analyse", "Als tendermanager wil ik een overzicht van gunningscriteria met weging zodat ik direct zie waarop de inschrijving wordt beoordeeld.", 5),
+    s("st-ta-3", "tender-analyse", "Als tendermanager wil ik deadlines en mijlpalen uit de leidraad in een tijdlijn zien zodat we geen termijn missen.", 3),
+    s("st-ta-4", "tender-analyse", "Als acquisitiemedewerker wil ik risico's en kansen gemarkeerd krijgen zodat we vroeg een bid/no-bid-afweging kunnen maken.", 5),
+    s("st-ta-5", "tender-analyse", "Als tendermanager wil ik de output als gestructureerd eisenoverzicht kunnen exporteren zodat het team ermee aan de slag kan.", 3),
+    // Schrijf-agent
+    s("st-sc-1", "schrijf", "Als tekstschrijver wil ik op basis van bullets een concepthoofdstuk in Blauwhoed tone-of-voice laten genereren zodat ik sneller een eerste versie heb.", 8),
+    s("st-sc-2", "schrijf", "Als tekstschrijver wil ik bestaande tekst laten aanscherpen in de huisstijl zodat alle hoofdstukken consistent klinken.", 5),
+    s("st-sc-3", "schrijf", "Als tendermanager wil ik goed/fout-voorbeelden kunnen beheren zodat de agent de tone-of-voice steeds beter leert.", 5),
+    s("st-sc-4", "schrijf", "Als reviewer wil ik per alinea zien welke wijzigingen de agent voorstelt zodat ik gericht kan accepteren of afwijzen.", 5),
+    // Structuur-agent
+    s("st-st-1", "structuur", "Als tendermanager wil ik losse input (mails, memo's, schetsen) kunnen samenvoegen tot één documentstructuur zodat niets verloren gaat.", 8),
+    s("st-st-2", "structuur", "Als tendermanager wil ik tegenstrijdigheden tussen disciplines gesignaleerd krijgen zodat we keuzes expliciet maken in plaats van stilzwijgend.", 5),
+    s("st-st-3", "structuur", "Als acquisitiemedewerker wil ik dat de documentstructuur de indeling van de leidraad volgt zodat de inschrijving aantoonbaar compleet is.", 3),
+    // Toets-agent
+    s("st-to-1", "toets", "Als tendermanager wil ik een concept laten scoren per gunningscriterium zodat ik zie waar we punten laten liggen.", 8),
+    s("st-to-2", "toets", "Als reviewer wil ik concreet verbeteradvies per hoofdstuk zodat we gericht kunnen verbeteren in plaats van alleen een score te krijgen.", 5),
+    s("st-to-3", "toets", "Als directie wil ik een jury-samenvatting van het concept zodat de go/no-go-beslissing onderbouwd is.", 3),
+    // Juridische-agent
+    s("st-ju-1", "juridisch", "Als jurist wil ik conceptcontracten laten scannen op red-flag clausules zodat risico's vroeg zichtbaar zijn.", 8),
+    s("st-ju-2", "juridisch", "Als jurist wil ik afwijkingen t.o.v. onze standaarden zien met artikelverwijzing en risico-inschatting zodat ik snel kan beoordelen.", 5),
+    s("st-ju-3", "juridisch", "Als tendermanager wil ik non-negotiables en warning-flags kunnen vastleggen zodat de agent weet wat hard is en wat signalering vraagt.", 3),
+    // Learning-agent
+    s("st-le-1", "learning", "Als projectteam willen we alle agent-interacties vanaf dag één gelogd hebben zodat de Learning-agent direct data verzamelt.", 5),
+    s("st-le-2", "learning", "Als management wil ik wins en losses met juryscores registreren zodat we de winrate kunnen volgen.", 3),
+    s("st-le-3", "learning", "Als projectteam willen we periodieke verbetervoorstellen per agent zodat de kwaliteit aantoonbaar stijgt.", 5),
+    // Academy
+    s("st-ac-1", "academy", "Als medewerker wil ik per agent een e-learningmodule zodat ik zelfstandig leer werken met het platform.", 5),
+    s("st-ac-2", "academy", "Als teamlead wil ik de voortgang van deelnemers zien zodat ik de training kan bijsturen.", 3),
+    s("st-ac-3", "academy", "Als beheerder wil ik content kunnen bijwerken zodat de Academy actueel blijft na oplevering.", 3),
+  ];
 }
 
 function mergeWithDefaults(raw: Partial<PortalState> | null): PortalState {
@@ -74,6 +128,7 @@ function mergeWithDefaults(raw: Partial<PortalState> | null): PortalState {
     comments: raw.comments ?? [],
     answers: { ...base.answers, ...(raw.answers ?? {}) },
     tasks: raw.tasks ?? base.tasks,
+    stories: raw.stories ?? base.stories,
   };
 }
 

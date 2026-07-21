@@ -35,6 +35,13 @@ const ICONS: Record<string, React.ReactNode> = {
       <rect x="16" y="4" width="5" height="7" rx="1.2" {...S} />
     </>
   ),
+  sprints: (
+    <>
+      <path d="M20 12a8 8 0 1 1-2.34-5.66" {...S} />
+      <path d="M18 2.5v4h-4" {...S} />
+      <path d="M9.5 12.5l2 2 3.5-4" {...S} />
+    </>
+  ),
   validatie: (
     <>
       <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h-1A2.5 2.5 0 0 1 4 13.5v-8z" {...S} />
@@ -61,6 +68,7 @@ const LINKS = [
   { href: "/", label: "Dashboard", icon: "dashboard" },
   { href: "/roadmap", label: "Roadmap", icon: "roadmap" },
   { href: "/scrumbord", label: "Scrumbord", icon: "scrumbord" },
+  { href: "/sprints", label: "Sprints", icon: "sprints" },
   { href: "/validatie", label: "Validatievragen", icon: "validatie" },
   { href: "/documenten", label: "Documenten", icon: "documenten" },
   { href: "/sla", label: "SLA & Beheer", icon: "sla" },
