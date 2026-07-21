@@ -188,44 +188,30 @@ export async function addStory(formData: FormData) {
   revalidateSprints();
 }
 
-/** Story plannen in een sprint, of terug naar de backlog ("backlog"). */
-export async function planStory(formData: FormData) {
+/**
+ * Story verplaatsen (drag & drop of knoppen): naar een sprint met status,
+ * of terug naar de backlog (sprintId null → status weer 'todo').
+ */
+export async function moveStoryTo(
+  storyId: string,
+  sprintId: string | null,
+  status: StoryStatus
+) {
   await requireAdmin();
-  const storyId = String(formData.get("storyId") ?? "");
-  const target = String(formData.get("sprintId") ?? "");
-
-  const state = await getState();
-  const story = state.stories.find((s) => s.id === storyId);
-  if (!story) return;
-  if (target === "backlog") {
-    story.sprintId = null;
-    story.status = "todo";
-  } else if (SPRINTS.some((s) => s.id === target)) {
-    story.sprintId = target;
-  } else {
-    return;
-  }
-  await saveState(state);
-  revalidateSprints();
-}
-
-export async function setStoryStatus(formData: FormData) {
-  await requireAdmin();
-  const storyId = String(formData.get("storyId") ?? "");
-  const status = String(formData.get("status") ?? "") as StoryStatus;
   if (!["todo", "doing", "done"].includes(status)) return;
+  if (sprintId !== null && !SPRINTS.some((s) => s.id === sprintId)) return;
 
   const state = await getState();
   const story = state.stories.find((s) => s.id === storyId);
   if (!story) return;
-  story.status = status;
+  story.sprintId = sprintId;
+  story.status = sprintId === null ? "todo" : status;
   await saveState(state);
   revalidateSprints();
 }
 
-export async function deleteStory(formData: FormData) {
+export async function deleteStoryById(storyId: string) {
   await requireAdmin();
-  const storyId = String(formData.get("storyId") ?? "");
   const state = await getState();
   state.stories = state.stories.filter((s) => s.id !== storyId);
   await saveState(state);
