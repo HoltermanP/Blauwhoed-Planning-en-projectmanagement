@@ -26,7 +26,7 @@ export default async function Dashboard() {
     <>
       <PageHeader
         title="Samen bouwen aan het Agentic Platform"
-        intro={`Volg hier live de planning en voortgang van de zes agents en de Academy — van design tot oplevering. Status per ${fmt(today)}.`}
+        intro={`We bouwen één agentic platform — het fundament met orchestratie, beheer en monitoring — waarop de zes agents en de Academy draaien. Volg hier live de planning en voortgang, van design tot oplevering. Status per ${fmt(today)}.`}
         image="/img/hero-film.jpg"
       >
         <div className="hero-chips">
@@ -56,7 +56,7 @@ export default async function Dashboard() {
         </div>
       </div>
 
-      <h2>Agents — status</h2>
+      <h2>Status per epic — platform, agents &amp; Academy</h2>
 
       <div className="mobile-only agent-cardlist">
         {AGENTS.map((a) => {

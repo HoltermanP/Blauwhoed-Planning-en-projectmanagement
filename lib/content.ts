@@ -50,6 +50,29 @@ export interface Agent {
 
 export const AGENTS: Agent[] = [
   {
+    id: "platform",
+    name: "Agentic Platform",
+    description:
+      "Het fundament waarop alle agents draaien: centrale orchestratie, datalaag, beheeromgeving, monitoring en security. Wordt als eerste gebouwd en beheert alles op één plek.",
+    owner: "AI-Group",
+    defaultColumn: "design",
+    defaultRisk: "on-track",
+    phases: [
+      { label: "Design & architectuur", start: "2026-07-20", end: "2026-07-28", kind: "design" },
+      { label: "Build fundament", start: "2026-07-29", end: "2026-08-23", kind: "build" },
+      { label: "Integratie & security", start: "2026-08-24", end: "2026-09-06", kind: "test" },
+      { label: "Platform live", start: "2026-09-07", end: "2026-09-07", kind: "deploy" },
+    ],
+    milestone: { label: "Platform live", date: "2026-09-07" },
+    dependencies: [],
+    successCriteria: [
+      "Alle zes agents draaien op één gezamenlijk platform met centrale orchestratie en gedeelde datalaag",
+      "Beheeromgeving met gebruikers, rollen, logging en monitoring op één plek",
+      "Dataverwerking conform Verwerkersovereenkomst (AVG); security-inrichting getoetst",
+      "Hosting-inrichting klaar voor 99,5% uptime in de Beheerfase (SLA)",
+    ],
+  },
+  {
     id: "tender-analyse",
     name: "Tender Analyse-agent",
     description:
@@ -64,7 +87,7 @@ export const AGENTS: Agent[] = [
       { label: "Deploy", start: "2026-09-20", end: "2026-09-20", kind: "deploy" },
     ],
     milestone: { label: "Live", date: "2026-09-20" },
-    dependencies: [],
+    dependencies: ["platform"],
     successCriteria: [
       "Extraheert eisen, voorwaarden, gunningscriteria en kansen uit een volledige tenderset",
       "Gevalideerd op minimaal 3 historische Blauwhoed-tenders",
@@ -86,7 +109,7 @@ export const AGENTS: Agent[] = [
       { label: "Deploy", start: "2026-09-23", end: "2026-09-23", kind: "deploy" },
     ],
     milestone: { label: "Live", date: "2026-09-23" },
-    dependencies: ["tender-analyse"],
+    dependencies: ["platform", "tender-analyse"],
     successCriteria: [
       "Tone-of-voice getraind op door Blauwhoed aangeleverde 'goed vs. fout'-voorbeelden",
       "Concepttekst per hoofdstuk in één iteratie op 80% redactieniveau",
@@ -108,7 +131,7 @@ export const AGENTS: Agent[] = [
       { label: "Deploy", start: "2026-10-01", end: "2026-10-01", kind: "deploy" },
     ],
     milestone: { label: "Live", date: "2026-10-01" },
-    dependencies: ["tender-analyse"],
+    dependencies: ["platform", "tender-analyse"],
     successCriteria: [
       "Voegt input van minimaal 4 disciplines samen tot één consistente structuur",
       "Signaleert tegenstrijdige input en legt keuzes voor in plaats van stilzwijgend te kiezen",
@@ -130,7 +153,7 @@ export const AGENTS: Agent[] = [
       { label: "Deploy", start: "2026-10-08", end: "2026-10-08", kind: "deploy" },
     ],
     milestone: { label: "Live", date: "2026-10-08" },
-    dependencies: ["tender-analyse", "schrijf"],
+    dependencies: ["platform", "tender-analyse", "schrijf"],
     successCriteria: [
       "Toetst per gunningscriterium op volledigheid en overtuigingskracht",
       "Jury-criteria gevalideerd met OM Acquisitie (validatievraag 4)",
@@ -152,7 +175,7 @@ export const AGENTS: Agent[] = [
       { label: "Deploy", start: "2026-10-13", end: "2026-10-13", kind: "deploy" },
     ],
     milestone: { label: "Live", date: "2026-10-13" },
-    dependencies: [],
+    dependencies: ["platform"],
     successCriteria: [
       "Non-negotiable clausules en warning-flags vastgelegd met Blauwhoed (validatievraag 5)",
       "Detecteert 100% van de vooraf gedefinieerde red-flag clausules in testset",
@@ -174,7 +197,7 @@ export const AGENTS: Agent[] = [
       { label: "Live", start: "2026-10-19", end: "2026-10-19", kind: "deploy" },
     ],
     milestone: { label: "Live", date: "2026-10-19" },
-    dependencies: ["tender-analyse", "schrijf", "structuur", "toets", "juridisch"],
+    dependencies: ["platform", "tender-analyse", "schrijf", "structuur", "toets", "juridisch"],
     successCriteria: [
       "Metrics voor 'beter' gedefinieerd met Blauwhoed (validatievraag 6), incl. wins vs. losses",
       "Feedback-loop actief op alle vijf overige agents",
@@ -215,10 +238,10 @@ export interface Sprint {
 }
 
 export const SPRINTS: Sprint[] = [
-  { id: "s1", naam: "Sprint 1", start: "2026-07-20", end: "2026-08-02", doel: "Design van alle agents en validatie met OM Acquisitie" },
-  { id: "s2", naam: "Sprint 2", start: "2026-08-03", end: "2026-08-16", doel: "Eerste builds Tender Analyse- en Schrijf-agent; datalogging Learning-agent live" },
-  { id: "s3", naam: "Sprint 3", start: "2026-08-17", end: "2026-08-30", doel: "Build kernagents; start Structuur- en Juridische-agent" },
-  { id: "s4", naam: "Sprint 4", start: "2026-08-31", end: "2026-09-13", doel: "Build afronden Tender Analyse; eerste keten-integraties" },
+  { id: "s1", naam: "Sprint 1", start: "2026-07-20", end: "2026-08-02", doel: "Design & architectuur van het platform-fundament en alle agents; validatie met OM Acquisitie" },
+  { id: "s2", naam: "Sprint 2", start: "2026-08-03", end: "2026-08-16", doel: "Bouw platform-fundament; eerste builds Tender Analyse- en Schrijf-agent; datalogging Learning-agent live" },
+  { id: "s3", naam: "Sprint 3", start: "2026-08-17", end: "2026-08-30", doel: "Platform-fundament afronden; build kernagents; start Structuur- en Juridische-agent" },
+  { id: "s4", naam: "Sprint 4", start: "2026-08-31", end: "2026-09-13", doel: "Platform live (integratie & security); build afronden Tender Analyse; eerste keten-integraties" },
   { id: "s5", naam: "Sprint 5", start: "2026-09-14", end: "2026-09-27", doel: "Test & livegang Tender Analyse en Schrijf; build Toets-agent" },
   { id: "s6", naam: "Sprint 6", start: "2026-09-28", end: "2026-10-11", doel: "Testen Toets- en Juridische-agent; UAT-voorbereiding; Academy vullen" },
   { id: "s7", naam: "Sprint 7", start: "2026-10-12", end: "2026-10-19", doel: "Opleversprint: integratie Learning-agent, acceptatie en training" },

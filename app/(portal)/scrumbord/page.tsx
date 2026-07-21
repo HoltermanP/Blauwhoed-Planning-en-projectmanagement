@@ -85,7 +85,7 @@ export default async function Scrumbord() {
     <>
       <PageHeader
         title="Scrumbord"
-        intro="Zeven epics — zes agents en de Academy — van backlog tot live. AI-Group werkt hier met taken per epic; klik op een epic voor detail, taken en feedback. Reacties en vragen zijn altijd welkom."
+        intro="Acht epics — het platform-fundament, zes agents en de Academy — van backlog tot live. AI-Group werkt hier met taken per epic; klik op een epic voor detail, taken en feedback. Reacties en vragen zijn altijd welkom."
         image="/img/harmonie.jpg"
       />
 

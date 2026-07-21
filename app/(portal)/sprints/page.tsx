@@ -95,7 +95,7 @@ export default async function Sprints({
     <>
       <PageHeader
         title="Sprintplanning"
-        intro="We werken in sprints van twee weken. Per sprintplanning kiezen we samen welke user stories van de backlog naar de sprint gaan; afgeronde sprints blijven bewaard zodat de historie zichtbaar is."
+        intro="We werken in sprints van twee weken aan het platform-fundament, de agents en de Academy. Per sprintplanning kiezen we samen welke user stories van de backlog naar de sprint gaan; afgeronde sprints blijven bewaard zodat de historie zichtbaar is."
         image="/img/erven.jpg"
       >
         <div className="hero-chips">

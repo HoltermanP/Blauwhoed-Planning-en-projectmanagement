@@ -241,10 +241,13 @@ export default async function Roadmap() {
       </div>
 
       <div className="notice">
-        De <strong>Learning-agent</strong> verzamelt vanaf dag één data uit alle andere
+        Het <strong>Agentic Platform</strong> is het fundament: daarop draaien alle
+        agents en wordt alles centraal beheerd. Het wordt als eerste gebouwd en gaat
+        op 7 september live, ruim vóór de eerste agent-livegang. De{" "}
+        <strong>Learning-agent</strong> verzamelt vanaf dag één data uit alle andere
         agents en integreert als laatste — die volgorde is een bewuste afhankelijkheid.
-        Oplevering ter Acceptatie (19 oktober) omvat alle agents, de Academy, inrichting
-        en training.
+        Oplevering ter Acceptatie (19 oktober) omvat het platform, alle agents, de
+        Academy, inrichting en training.
       </div>
     </>
   );

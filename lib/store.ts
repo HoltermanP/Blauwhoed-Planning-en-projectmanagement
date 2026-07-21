@@ -86,6 +86,12 @@ function seedStories(): Story[] {
     id, agentId, title, points, sprintId: null, status: "todo",
   });
   return [
+    // Agentic Platform (fundament)
+    s("st-pl-1", "platform", "Als AI-Group willen we een centrale orchestratielaag zodat alle agents gecoördineerd samenwerken en data delen.", 8),
+    s("st-pl-2", "platform", "Als beheerder wil ik gebruikers en rollen centraal beheren zodat toegang tot het platform veilig en overzichtelijk is.", 5),
+    s("st-pl-3", "platform", "Als beheerder wil ik logging en monitoring van alle agent-runs zodat we prestaties en fouten direct zien.", 5),
+    s("st-pl-4", "platform", "Als Blauwhoed willen we dat alle data conform de Verwerkersovereenkomst wordt verwerkt zodat AVG-compliance geborgd is.", 5),
+    s("st-pl-5", "platform", "Als AI-Group willen we een geautomatiseerde deploy-pijplijn zodat agent-updates zonder downtime live gaan.", 3),
     // Tender Analyse-agent
     s("st-ta-1", "tender-analyse", "Als acquisitiemedewerker wil ik een tenderset (PDF's) kunnen uploaden zodat de agent eisen, voorwaarden en criteria automatisch extraheert.", 8),
     s("st-ta-2", "tender-analyse", "Als tendermanager wil ik een overzicht van gunningscriteria met weging zodat ik direct zie waarop de inschrijving wordt beoordeeld.", 5),
@@ -123,12 +129,19 @@ function seedStories(): Story[] {
 function mergeWithDefaults(raw: Partial<PortalState> | null): PortalState {
   const base = defaultState();
   if (!raw) return base;
+  // Seeds voor epics die nog niet in de opgeslagen state voorkomen (bijv. een
+  // later toegevoegde epic) worden aangevuld; bestaande epics blijven zoals ze zijn.
+  const withSeeds = <T extends { agentId: string }>(saved: T[] | undefined, seeds: T[]): T[] => {
+    if (!saved) return seeds;
+    const knownAgents = new Set(saved.map((i) => i.agentId));
+    return [...saved, ...seeds.filter((i) => !knownAgents.has(i.agentId))];
+  };
   return {
     epics: { ...base.epics, ...(raw.epics ?? {}) },
     comments: raw.comments ?? [],
     answers: { ...base.answers, ...(raw.answers ?? {}) },
-    tasks: raw.tasks ?? base.tasks,
-    stories: raw.stories ?? base.stories,
+    tasks: withSeeds(raw.tasks, base.tasks),
+    stories: withSeeds(raw.stories, base.stories),
   };
 }
 

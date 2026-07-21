@@ -52,6 +52,13 @@ const STROKE = {
 /** Lijn-icoon per agent/epic. */
 export function AgentIcon({ id, size = 22 }: { id: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
+    platform: (
+      <>
+        <path d="M12 2.8l8.5 4.2L12 11.2 3.5 7 12 2.8z" {...STROKE} />
+        <path d="M3.5 12l8.5 4.2 8.5-4.2" {...STROKE} />
+        <path d="M3.5 17l8.5 4.2 8.5-4.2" {...STROKE} />
+      </>
+    ),
     "tender-analyse": (
       <>
         <path d="M6 3h8l4 4v6" {...STROKE} />
