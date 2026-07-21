@@ -20,7 +20,10 @@ export default function PageHeader({
 }) {
   const style = image
     ? {
-        backgroundImage: `linear-gradient(110deg, rgba(9, 20, 36, 0.94) 0%, rgba(14, 30, 51, 0.86) 42%, rgba(20, 58, 110, 0.55) 100%), url(${image})`,
+        backgroundImage:
+          `linear-gradient(to top, rgba(9, 20, 36, 0.60) 0%, rgba(9, 20, 36, 0) 45%), ` +
+          `linear-gradient(105deg, rgba(9, 20, 36, 0.92) 0%, rgba(12, 26, 46, 0.72) 38%, rgba(16, 42, 80, 0.32) 70%, rgba(20, 58, 110, 0.10) 100%), ` +
+          `url(${image})`,
         backgroundSize: "cover",
         backgroundPosition: imagePosition,
       }
