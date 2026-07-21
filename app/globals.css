@@ -201,6 +201,37 @@ h2::before { content: ""; width: 4px; height: 16px; border-radius: 2px; backgrou
 .badge-critical .dot { color: var(--status-critical); }
 .badge-neutral { color: var(--ink-2); }
 
+/* ---------- Responsief tonen/verbergen ----------
+   Elementen houden hun eigen display-waarde; alleen verbergen gebeurt hier. */
+@media (min-width: 701px) { .mobile-only { display: none !important; } }
+@media (max-width: 700px) { .desktop-only { display: none !important; } }
+
+/* Gestapelde agent-statuskaartjes (mobiel alternatief voor de tabel) */
+.agent-cardlist { display: grid; gap: 10px; }
+.agent-cardlist .arow {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px 14px; box-shadow: var(--shadow);
+}
+.agent-cardlist .arow .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.agent-cardlist .arow .top a { color: var(--ink); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+.agent-cardlist .arow .top svg { color: var(--brand); flex-shrink: 0; }
+.agent-cardlist .arow .meta { font-size: 12.5px; color: var(--ink-2); margin-top: 7px; }
+.agent-cardlist .arow .note { font-size: 12px; color: var(--warning-text); margin-top: 5px; }
+
+/* Fasen-tijdlijn op mobiel (roadmap) */
+.phase-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--grid); font-size: 13px;
+}
+.phase-row:last-child { border-bottom: none; }
+.phase-name { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.phase-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.phase-dates { color: var(--ink-2); font-size: 12.5px; text-align: right; }
+.phase-done .phase-dates { color: var(--good-text); }
+.phase-active .phase-name { color: var(--brand-ink); }
+.phase-active .phase-dates { color: var(--brand-ink); font-weight: 600; }
+.phase-planned .phase-dates { color: var(--muted); }
+
 /* ---------- Tabellen ---------- */
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--baseline); }
@@ -241,15 +272,29 @@ tr:last-child td { border-bottom: none; }
 /* ---------- Kanban ---------- */
 .kanban { display: grid; grid-template-columns: repeat(6, minmax(196px, 1fr)); gap: 12px; overflow-x: auto; align-items: start; padding-bottom: 6px; }
 @media (max-width: 1100px) { .kanban { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 700px) {
-  /* Swipebaar bord (Trello-stijl) in plaats van één lange kolom */
-  .kanban {
-    display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    margin-left: -14px; margin-right: -14px; padding: 0 14px 10px;
-  }
-  .kanban-col { min-width: 250px; flex: 0 0 250px; scroll-snap-align: start; }
+/* Mobiel scrumbord: kolommen onder elkaar, inklapbaar */
+.kanban-stack { display: grid; gap: 10px; }
+.kb-sec {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 13px; box-shadow: var(--shadow); overflow: hidden;
 }
+.kb-sec summary {
+  list-style: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 15px;
+  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ink-2);
+}
+.kb-sec summary::-webkit-details-marker { display: none; }
+.kb-sec summary .cnt {
+  background: var(--brand-wash); color: var(--brand-ink);
+  border-radius: 999px; padding: 2px 11px; font-size: 12.5px;
+  text-transform: none; letter-spacing: 0;
+}
+.kb-sec[open] summary { border-bottom: 1px solid var(--grid); }
+.kb-sec .kb-body { padding: 10px 13px 13px; }
+.kb-sec .kb-body .hint { font-size: 11.5px; color: var(--muted); margin-bottom: 10px; }
+.kb-sec .kanban-card:last-child { margin-bottom: 0; }
 .kanban-col { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; min-height: 140px; box-shadow: var(--shadow); }
 .kanban-col h3 { font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; color: var(--ink-2); }
 .kanban-col .hint { font-size: 11px; color: var(--muted); margin-bottom: 12px; }

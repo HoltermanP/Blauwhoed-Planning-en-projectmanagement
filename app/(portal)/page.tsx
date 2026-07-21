@@ -4,6 +4,7 @@ import { daysBetween, fmt, fmtDateTime, progressPct, todayISO } from "@/lib/date
 import { getState } from "@/lib/store";
 import { Progress, RiskBadge } from "@/components/ui";
 import PageHeader from "@/components/PageHeader";
+import { AgentIcon } from "@/components/art";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,30 @@ export default async function Dashboard() {
       </div>
 
       <h2>Agents — status</h2>
-      <div className="card table-wrap" style={{ padding: 0 }}>
+
+      <div className="mobile-only agent-cardlist">
+        {AGENTS.map((a) => {
+          const epic = state.epics[a.id];
+          const col = COLUMNS.find((c) => c.key === epic.column);
+          return (
+            <div className="arow" key={a.id}>
+              <div className="top">
+                <Link href={`/agents/${a.id}`}>
+                  <AgentIcon id={a.id} size={17} />
+                  {a.name}
+                </Link>
+                <RiskBadge risk={epic.risk} />
+              </div>
+              {epic.note && <div className="note">▲ {epic.note}</div>}
+              <div className="meta">
+                {col?.label} · {a.milestone.label}: {fmt(a.milestone.date)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="card table-wrap desktop-only" style={{ padding: 0 }}>
         <table>
           <thead>
             <tr>

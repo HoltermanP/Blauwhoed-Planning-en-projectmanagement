@@ -45,7 +45,8 @@ export default async function Roadmap() {
         image="/img/casavita.jpg"
       />
 
-      <div className="card">
+      {/* Desktop: Gantt */}
+      <div className="card desktop-only">
         <div className="gantt">
           <div className="gantt-inner">
           <div className="gantt-months">
@@ -105,8 +106,44 @@ export default async function Roadmap() {
         </div>
       </div>
 
+      {/* Mobiel: fasen-tijdlijn per agent */}
+      <div className="mobile-only agent-cardlist">
+        {AGENTS.map((a) => (
+          <div className="arow" key={a.id}>
+            <div className="top">
+              <Link href={`/agents/${a.id}`}>
+                <AgentIcon id={a.id} size={17} />
+                {a.name}
+              </Link>
+              <RiskBadge risk={state.epics[a.id].risk} />
+            </div>
+            <div style={{ marginTop: 8 }}>
+              {a.phases.map((p) => {
+                const status = today > p.end ? "done" : today >= p.start ? "active" : "planned";
+                return (
+                  <div className={`phase-row phase-${status}`} key={p.label}>
+                    <span className="phase-name">
+                      <span className="phase-dot" style={{ background: PHASE_COLOR[p.kind] }} />
+                      {p.label}
+                    </span>
+                    <span className="phase-dates">
+                      {fmtShort(p.start)}{p.start !== p.end && <> – {fmtShort(p.end)}</>}
+                      {status === "done" && " · ✓"}
+                      {status === "active" && " · actief"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="meta">◆ {a.milestone.label}: {fmt(a.milestone.date)}</div>
+          </div>
+        ))}
+      </div>
+
       <h2>Milestones &amp; status</h2>
-      <div className="card table-wrap" style={{ padding: 0 }}>
+
+      {/* Desktop: tabel */}
+      <div className="card table-wrap desktop-only" style={{ padding: 0 }}>
         <table>
           <thead>
             <tr>
@@ -133,6 +170,27 @@ export default async function Roadmap() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobiel: gestapelde kaartjes */}
+      <div className="mobile-only agent-cardlist">
+        {AGENTS.map((a) => (
+          <div className="arow" key={a.id}>
+            <div className="top">
+              <Link href={`/agents/${a.id}`}>
+                <AgentIcon id={a.id} size={17} />
+                {a.name}
+              </Link>
+              <RiskBadge risk={state.epics[a.id].risk} />
+            </div>
+            <div className="meta">
+              ◆ {a.milestone.label}: {fmt(a.milestone.date)}
+              {a.dependencies.length > 0 && (
+                <> · afhankelijk van {a.dependencies.map((d) => agentById(d)?.name.replace("-agent", "")).join(", ")}</>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="notice">
