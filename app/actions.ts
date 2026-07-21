@@ -140,7 +140,7 @@ export async function saveDoc(formData: FormData) {
   }
 
   if (file instanceof File && file.size > 0) {
-    if (doc.file) await deleteUpload(doc.id, doc.file.name);
+    if (doc.file) await deleteUpload(doc.id, doc.file);
     doc.file = await saveUpload(doc.id, file);
   }
 
@@ -154,7 +154,7 @@ export async function deleteDoc(formData: FormData) {
   const state = await getState();
   const doc = state.docs.find((d) => d.id === docId);
   if (!doc) return;
-  if (doc.file) await deleteUpload(doc.id, doc.file.name);
+  if (doc.file) await deleteUpload(doc.id, doc.file);
   state.docs = state.docs.filter((d) => d.id !== docId);
   await saveState(state);
   revalidatePath("/documenten");
@@ -166,7 +166,7 @@ export async function removeDocFile(formData: FormData) {
   const state = await getState();
   const doc = state.docs.find((d) => d.id === docId);
   if (!doc?.file) return;
-  await deleteUpload(doc.id, doc.file.name);
+  await deleteUpload(doc.id, doc.file);
   delete doc.file;
   await saveState(state);
   revalidatePath("/documenten");

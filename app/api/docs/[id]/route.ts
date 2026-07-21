@@ -21,17 +21,26 @@ export async function GET(
     return NextResponse.json({ error: "Geen bestand voor dit document" }, { status: 404 });
   }
 
+  const headers = {
+    "Content-Type": doc.file.type || "application/octet-stream",
+    "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(doc.file.name)}`,
+    "Cache-Control": "private, no-store",
+  };
+
+  // Vercel Blob: server-side doorstreamen zodat de login-check blijft gelden.
+  if (doc.file.url) {
+    const res = await fetch(doc.file.url);
+    if (!res.ok || !res.body) {
+      return NextResponse.json({ error: "Bestand niet gevonden in blob-opslag" }, { status: 404 });
+    }
+    return new NextResponse(res.body, { headers });
+  }
+
   const buffer = await readUpload(doc.id, doc.file.name);
   if (!buffer) {
     return NextResponse.json({ error: "Bestand niet gevonden op de server" }, { status: 404 });
   }
-
   return new NextResponse(new Uint8Array(buffer), {
-    headers: {
-      "Content-Type": doc.file.type || "application/octet-stream",
-      "Content-Length": String(buffer.length),
-      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(doc.file.name)}`,
-      "Cache-Control": "private, no-store",
-    },
+    headers: { ...headers, "Content-Length": String(buffer.length) },
   });
 }

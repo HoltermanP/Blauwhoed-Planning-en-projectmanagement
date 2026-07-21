@@ -52,6 +52,8 @@ export interface DocFile {
   size: number;
   type: string;
   uploadedAt: string;
+  /** Vercel Blob-URL; ontbreekt bij lokale opslag in .data/uploads/. */
+  url?: string;
 }
 
 /** Document in de documenten-hub — beheerbaar door AI-Group. */

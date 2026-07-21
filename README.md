@@ -28,7 +28,12 @@ Zonder `DATABASE_URL` wordt state lokaal opgeslagen in `.data/state.json`.
    - `DATABASE_URL` — Neon connection string (vereist op Vercel; het bestandssysteem is daar niet persistent)
    - `PORTAL_ADMIN_PASSWORD` en `PORTAL_CLIENT_PASSWORD` — sterke wachtwoorden
    - `CRON_SECRET` — willekeurige string voor de digest-cron
-4. Kies desgewenst het domein `blauwhoed-portal.vercel.app` onder Settings → Domains.
+4. Koppel voor documenten-uploads een **Vercel Blob**-store: dashboard →
+   Storage → Blob → Connect to project. Vercel zet `BLOB_READ_WRITE_TOKEN` dan
+   automatisch; uploads en downloads werken daarna zonder verdere config
+   (zonder token vallen uploads terug op lokaal `.data/uploads/`, dat op Vercel
+   niet persistent is).
+5. Kies desgewenst het domein `blauwhoed-portal.vercel.app` onder Settings → Domains.
 
 De tabel `portal_state` wordt automatisch aangemaakt bij het eerste gebruik.
 
@@ -51,8 +56,13 @@ mailprovider en afzenderdomein ligt bij Patrick.
 - **Persistentie:** één `jsonb`-document in Neon (`lib/store.ts`) met
   file-fallback voor development. Ruim voldoende voor dit gebruiksvolume;
   makkelijk te normaliseren naar losse tabellen als het portal groeit.
-- **Statische content** (agents, fasering, documenten, SLA, contacten) staat in
-  `lib/content.ts` — één plek om planning en teksten bij te werken.
+- **Bestandsopslag** (`lib/files.ts`): Vercel Blob zodra `BLOB_READ_WRITE_TOKEN`
+  gezet is, anders lokaal `.data/uploads/`. Blob-URL's zijn onraadbaar maar
+  publiek; daarom lopen downloads altijd via `/api/docs/[id]`, dat eerst de
+  login-cookie controleert en het bestand server-side doorstreamt.
+- **Statische content** (agents, fasering, SLA, contacten) staat in
+  `lib/content.ts` — één plek om planning en teksten bij te werken. Documenten
+  en validatievragen zijn beheerbaar via de UI en leven in de database-state.
 - **Kleuren/status:** gevalideerd dataviz-palet; status altijd icoon + label,
   nooit kleur alleen. Light & dark mode.
 
