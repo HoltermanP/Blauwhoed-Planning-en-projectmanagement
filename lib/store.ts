@@ -91,9 +91,10 @@ export interface PortalState {
   docs: DocItem[];
 }
 
-// v2: backlog vervangen door userstories_agentic_platform.md en
-// userstories_platform_infrastructure.md (beide v1.0, 21-07-2026).
-const STORY_SEED_VERSION = 2;
+// v3 (27-07-2026): backlog herzien — per epic ±12 functionele, business-gerichte
+// userstories; technische stories (SSO, webhooks, backups e.d.) zijn eruit
+// gehaald en kunnen later als aparte technische backlog worden toegevoegd.
+const STORY_SEED_VERSION = 3;
 
 function defaultState(): PortalState {
   const epics: Record<string, EpicState> = {};
@@ -122,10 +123,8 @@ function defaultState(): PortalState {
   };
 }
 
-// Productbacklog conform twee documenten van 21-07-2026 (beide v1.0):
-// - userstories_agentic_platform.md: agent- en Academy-stories, nummering 1.1 t/m 7.6.
-// - userstories_platform_infrastructure.md: platform-epic, nummering P1.1 t/m P8.4
-//   ("P"-prefix omdat dat document zijn eigen epic-nummering 1-8 hanteert).
+// Productbacklog v3 (herzien 27-07-2026): per epic ±12 functionele userstories
+// in businesstaal, genummerd P.x (platform) en 1.x t/m 7.x (agents/Academy).
 // Alles start in de backlog (sprintId: null); per sprintplanning worden
 // stories aan een sprint toegewezen.
 function seedStories(): Story[] {
@@ -133,85 +132,112 @@ function seedStories(): Story[] {
     id, agentId, title, points, sprintId: null, status: "todo",
   });
   return [
-    // Agentic Platform — Epic P1: User & Access Management
-    s("st-p-1-1", "platform", "P1.1 Als Blauwhoed-administrator wil ik nieuwe gebruikers kunnen registreren en aan teams toewijzen (invite-mail, MFA-setup, bulkimport) zodat het team meteen het platform kan gebruiken.", 5),
-    s("st-p-1-2", "platform", "P1.2 Als Blauwhoed-administrator wil ik granulaire rollen definiëren (Admin, ProjectManager, AcquisitionManager, Viewer, Analyst) zodat iedereen alleen toegang heeft tot wat nodig is.", 5),
-    s("st-p-1-3", "platform", "P1.3 Als developer/system-integrator wil ik API-keys genereren en beheren (scopes, rotatie, rate limiting) zodat ik het platform kan integreren met externe systemen zoals CRM en projectmanagement.", 5),
-    s("st-p-1-4", "platform", "P1.4 Als Blauwhoed IT-manager wil ik SSO integreren (Azure AD/Okta via SAML 2.0/OpenID Connect) met tenant-isolatie zodat gebruikers met hun bedrijfsaccount inloggen.", 8),
-    s("st-p-1-5", "platform", "P1.5 Als security officer wil ik sessies beheren en MFA afdwingen (verplicht voor admins, sessietimeouts, login-history) zodat het platform veilig blijft.", 5),
-    // Agentic Platform — Epic P2: Agent & Workflow Management
-    s("st-p-2-1", "platform", "P2.1 Als platform-operator wil ik agents kunnen deployen, upgraden en rollbacken (canary deployment, health checks, versiehistorie) zodat nieuwe agent-versies live gaan zonder downtime.", 8),
-    s("st-p-2-2", "platform", "P2.2 Als platform-operator wil ik real-time health-metrics per agent zien (uptime, error rate, latency, alerts naar Slack/e-mail) zodat ik problemen snel spot.", 5),
-    s("st-p-2-3", "platform", "P2.3 Als projectmanager wil ik agent-parameters kunnen tweaken zonder code-deploy (versioned configs, A/B-tests, rollback) zodat ik snel kan optimaliseren.", 5),
-    s("st-p-2-4", "platform", "P2.4 Als projectmanager wil ik workflows definiëren (bijv. Tender Analyse → Toets → Learning) met conditionele logica en retry-afhandeling zodat complexe multi-agent-jobs automatisch lopen.", 8),
-    // Agentic Platform — Epic P3: Credits & Usage Tracking
-    s("st-p-3-1", "platform", "P3.1 Als billing-manager wil ik per agent-run zien hoeveel credits die kost (tokens, computetijd, API-calls) zodat ik accuraat kan factureren.", 5),
-    s("st-p-3-2", "platform", "P3.2 Als Blauwhoed-administrator wil ik maandelijkse creditbudgetten alloceren aan teams en gebruikers (sub-quota's, alerts bij 70%/90%) zodat we spending controleren.", 5),
-    s("st-p-3-3", "platform", "P3.3 Als platform-operator wil ik beleid instellen voor quota-overschrijding (hard-stop, soft-cap, auto-pause, rate limiting) zodat we kosten begrenzen.", 3),
-    s("st-p-3-4", "platform", "P3.4 Als financial-manager wil ik dat usage-data automatisch naar het billing-systeem gaat (facturatie, betalingen, multi-currency) zodat facturen accuraat en op tijd zijn.", 8),
-    // Agentic Platform — Epic P4: Monitoring, Logging & Observability
-    s("st-p-4-1", "platform", "P4.1 Als platform-operator wil ik alle logs (app, agent, API, systeem) op één plek met structured logging en PII-masking zodat ik sneller kan debuggen.", 5),
-    s("st-p-4-2", "platform", "P4.2 Als platform-operator wil ik een unified dashboard van platform-metrics (requests/sec, latency, error rate, per tenant/agent) met alertregels zodat ik de health snel kan beoordelen.", 5),
-    s("st-p-4-3", "platform", "P4.3 Als engineer wil ik request-flows kunnen tracen van entry tot exit (trace-IDs, latency-breakdown, slow-query-detectie) zodat ik bottlenecks spot.", 5),
-    s("st-p-4-4", "platform", "P4.4 Als security officer wil ik alle security-relevante events auditeren (immutable logs, minimaal 1 jaar retentie, exporteerbaar) zodat ik compliance kan aantonen.", 5),
-    // Agentic Platform — Epic P5: Data Management & Backup
-    s("st-p-5-1", "platform", "P5.1 Als platform-operator wil ik dagelijkse geautomatiseerde backups met point-in-time recovery (geo-redundant, RTO <4u, RPO <1u) zodat dataverlies voorkomen wordt.", 5),
-    s("st-p-5-2", "platform", "P5.2 Als Blauwhoed wil ik al onze data kunnen exporteren in standaardformaten (JSON/CSV, binnen 24 uur, met checksums) zodat we niet vendor-locked zitten.", 3),
-    s("st-p-5-3", "platform", "P5.3 Als security officer wil ik dat tenant-data volledig geïsoleerd en verwijderbaar is (soft/hard delete, right to be forgotten) zodat GDPR-compliance gewaarborgd is.", 5),
-    s("st-p-5-4", "platform", "P5.4 Als platform-operator wil ik geautomatiseerd databaseonderhoud (indexoptimalisatie, archivering, partitionering) zodat de performance op peil blijft.", 3),
-    // Agentic Platform — Epic P6: Integration & API Management
-    s("st-p-6-1", "platform", "P6.1 Als developer wil ik webhooks configureren voor events (workflow gestart/afgerond/mislukt, quota overschreden) met retry-logica zodat ik externe systemen kan triggeren.", 5),
-    s("st-p-6-2", "platform", "P6.2 Als developer wil ik third-party apps integreren via OAuth 2.0 (Slack, Teams, Zapier, Make) zodat resultaten naar communicatietools gepusht kunnen worden.", 5),
-    s("st-p-6-3", "platform", "P6.3 Als security officer wil ik dat webhook-requests gesigneerd zijn (HMAC-SHA256, timestamp tegen replay-attacks) zodat ik kan verifiëren dat ze van ons platform komen.", 3),
-    s("st-p-6-4", "platform", "P6.4 Als platform-operator wil ik rate-limits afdwingen per API-key/integratie (429-responses, burst allowance, abuse-alerts) zodat één bad actor het platform niet plat legt.", 3),
-    // Agentic Platform — Epic P7: Security & Compliance
-    s("st-p-7-1", "platform", "P7.1 Als platform-operator wil ik secrets centraal en veilig beheren (vault, encryptie, automatische rotatie, toegangs-audit) zodat er geen secrets in code of config staan.", 5),
-    s("st-p-7-2", "platform", "P7.2 Als security officer wil ik automatisch scannen op vulnerabilities (dependencies, containers, code; CVE-alerts) zodat patches urgent gedeployed kunnen worden.", 5),
-    s("st-p-7-3", "platform", "P7.3 Als platform-operator wil ik het platform beschermd hebben tegen DDoS-aanvallen (WAF, IP-rate-limiting, CDN-integratie) zodat de beschikbaarheid gewaarborgd is.", 3),
-    s("st-p-7-4", "platform", "P7.4 Als compliance officer wil ik aantonen dat het platform voldoet aan compliance-eisen (SOC 2 Type II, GDPR, ISO 27001, jaarlijkse pentest) zodat klanten ons vertrouwen.", 5),
-    // Agentic Platform — Epic P8: Support & Operations
-    s("st-p-8-1", "platform", "P8.1 Als Blauwhoed-gebruiker wil ik supporttickets kunnen openen en de status volgen (SLA: P1 <1u, P2 <4u, P3 <24u) zodat issues opgelost worden.", 5),
-    s("st-p-8-2", "platform", "P8.2 Als platform-operator wil ik incidenten managen en de status communiceren (severity-levels, publieke statuspagina, postmortems) zodat we transparant zijn.", 5),
-    s("st-p-8-3", "platform", "P8.3 Als Blauwhoed-gebruiker wil ik de productroadmap zien en op features kunnen stemmen zodat ik invloed heb op de prioriteiten.", 3),
-    s("st-p-8-4", "platform", "P8.4 Als nieuwe gebruiker wil ik uitgebreide documentatie (interactieve API-docs, guides, FAQ, video-tutorials, doorzoekbaar) zodat ik self-service kan leren.", 5),
+    // Epic P: Agentic Platform
+    s("st-p-1", "platform", "P.1 Als Blauwhoed-medewerker wil ik veilig kunnen inloggen met mijn eigen bedrijfsaccount zodat ik zonder aparte wachtwoorden toegang heb tot het platform.", 5),
+    s("st-p-2", "platform", "P.2 Als beheerder wil ik collega's kunnen uitnodigen en een rol kunnen geven (beheerder, gebruiker, meekijker) zodat iedereen precies de juiste toegang heeft.", 3),
+    s("st-p-3", "platform", "P.3 Als acquisitiemanager wil ik per tender een eigen projectomgeving kunnen aanmaken zodat alle documenten, analyses en teksten van die tender op één plek staan.", 5),
+    s("st-p-4", "platform", "P.4 Als gebruiker wil ik op een startdashboard direct de status van al mijn lopende tenders zien zodat ik meteen weet waar actie nodig is.", 5),
+    s("st-p-5", "platform", "P.5 Als gebruiker wil ik alle agents vanuit één werkomgeving kunnen starten zodat ik niet hoef te schakelen tussen losse tools.", 5),
+    s("st-p-6", "platform", "P.6 Als gebruiker wil ik kunnen zien waar een agent mee bezig is en hoe lang het nog duurt zodat ik weet wanneer ik het resultaat kan verwachten.", 3),
+    s("st-p-7", "platform", "P.7 Als gebruiker wil ik een melding krijgen (in het platform of per e-mail) wanneer een agent klaar is of iets van mij nodig heeft zodat ik snel kan reageren.", 3),
+    s("st-p-8", "platform", "P.8 Als acquisitiemanager wil ik resultaten van agents eenvoudig kunnen delen met collega's zodat het hele team met dezelfde versie werkt.", 3),
+    s("st-p-9", "platform", "P.9 Als gebruiker wil ik eerdere resultaten en oudere versies altijd kunnen terugvinden zodat er nooit werk verloren gaat.", 5),
+    s("st-p-10", "platform", "P.10 Als beheerder wil ik documenten en bronbestanden centraal kunnen beheren (uploaden, ordenen, vervangen) zodat agents altijd met de juiste en actuele bronnen werken.", 5),
+    s("st-p-11", "platform", "P.11 Als beheerder wil ik kunnen terugzien wie wat wanneer heeft gedaan op het platform zodat we grip houden op het gebruik.", 3),
+    s("st-p-12", "platform", "P.12 Als directielid wil ik een overzicht van het gebruik en de opbrengst van het platform (aantal tenders, doorlooptijd, tijdwinst) zodat ik de waarde voor Blauwhoed kan volgen.", 5),
+    s("st-p-13", "platform", "P.13 Als gebruiker wil ik erop kunnen vertrouwen dat vertrouwelijke tenderinformatie alleen zichtbaar is voor het eigen projectteam zodat gevoelige informatie beschermd blijft.", 5),
+    s("st-p-14", "platform", "P.14 Als gebruiker wil ik vanuit het platform eenvoudig een vraag of storing kunnen melden en de afhandeling volgen zodat ik snel geholpen word.", 3),
     // Epic 1: Tender Analyse-agent
-    s("st-1-1", "tender-analyse", "1.1 Als acquisitiemanager wil ik tenderdocumenten (PDF) kunnen uploaden zodat de Tender Analyse-agent automatisch basisgegevens extraheert (opdrachtgever, budget, deadline, raamwerk).", 8),
-    s("st-1-2", "tender-analyse", "1.2 Als acquisitiemanager wil ik dat de agent alle functionele en technische eisen uit het tender-dossier verzamelt en categoriseert zodat ik snel inzicht heb in wat Blauwhoed moet leveren.", 8),
-    s("st-1-3", "tender-analyse", "1.3 Als acquisitiemanager wil ik dat de agent het opdrachtgever-profiel en de jury-voorkeuren uit het document haalt zodat Blauwhoed kan richten op wat de jury waarschijnlijk waardeert.", 5),
-    s("st-1-4", "tender-analyse", "1.4 Als acquisitiemanager wil ik dat de agent rode vlaggen direct signaleert (exclusiecriteria, capacity- en geo-risico's) zodat ik sneller kan bepalen of dit tender geschikt is voor Blauwhoed (go/no-go).", 5),
+    s("st-1-1", "tender-analyse", "1.1 Als acquisitiemanager wil ik een complete tenderset (leidraad, bijlagen, contractstukken) in één keer kunnen uploaden zodat de agent alles direct kan analyseren.", 5),
+    s("st-1-2", "tender-analyse", "1.2 Als acquisitiemanager wil ik een automatische samenvatting van de tender (opdrachtgever, opgave, locatie, planning, budget) zodat ik in vijf minuten de kern ken.", 5),
+    s("st-1-3", "tender-analyse", "1.3 Als acquisitiemanager wil ik alle eisen en voorwaarden overzichtelijk in één lijst, gegroepeerd per thema, zodat ik direct zie wat Blauwhoed moet leveren.", 8),
+    s("st-1-4", "tender-analyse", "1.4 Als acquisitiemanager wil ik de gunningscriteria en hun weging helder op een rij zodat we weten waar de punten te verdienen zijn.", 5),
+    s("st-1-5", "tender-analyse", "1.5 Als projectleider wil ik alle belangrijke deadlines (vragenronde, indiening, presentatie, gunning) in een tijdlijn zien zodat we geen enkele datum missen.", 3),
+    s("st-1-6", "tender-analyse", "1.6 Als acquisitiemanager wil ik dat de agent rode vlaggen en uitsluitingsgronden direct signaleert zodat ik snel een go/no-go-besluit kan voorbereiden.", 5),
+    s("st-1-7", "tender-analyse", "1.7 Als acquisitiemanager wil ik dat de agent kansen benoemt waar Blauwhoed zich kan onderscheiden (bijv. duurzaamheid, participatie) zodat we die bewust kunnen benutten.", 5),
+    s("st-1-8", "tender-analyse", "1.8 Als acquisitiemanager wil ik een profiel van de opdrachtgever en de jury zodat we onze inzending kunnen richten op wat zij belangrijk vinden.", 5),
+    s("st-1-9", "tender-analyse", "1.9 Als acquisitiemanager wil ik dat de agent de tender vergelijkt met eerdere vergelijkbare tenders van Blauwhoed zodat we ervaring en materiaal kunnen hergebruiken.", 5),
+    s("st-1-10", "tender-analyse", "1.10 Als projectleider wil ik dat de agent voorstellen doet voor vragen voor de nota van inlichtingen zodat we onduidelijkheden op tijd wegnemen.", 3),
+    s("st-1-11", "tender-analyse", "1.11 Als projectleider wil ik een checklist van alle in te dienen stukken en vormvereisten zodat onze indiening gegarandeerd compleet is.", 3),
+    s("st-1-12", "tender-analyse", "1.12 Als acquisitiemanager wil ik de analyse als overzichtelijk rapport kunnen delen zodat het managementteam er direct over kan beslissen.", 3),
     // Epic 2: Schrijf-agent
-    s("st-2-1", "schrijf", "2.1 Als acquisitiemanager wil ik dat de Schrijf-agent een sterke 1-pager executive summary schrijft voor het tender zodat het OMT snel de kernboodschap begrijpt.", 5),
-    s("st-2-2", "schrijf", "2.2 Als projectleider wil ik dat de Schrijf-agent een visiedocument-template invult met tender-specifieke content zodat het team meteen een basis heeft om verder te schrijven.", 8),
-    s("st-2-3", "schrijf", "2.3 Als jurist/acquisitiemanager wil ik dat de Schrijf-agent contractteksten genereert op basis van template en tender-requirements zodat juridische review en onderhandelingen sneller gaan.", 8),
-    s("st-2-4", "schrijf", "2.4 Als communicatiemanager wil ik dat de Schrijf-agent alle gegenereerde teksten aanscherpt op Blauwhoed tone-of-voice zodat alle output consistent en professioneel voelt.", 5),
+    s("st-2-1", "schrijf", "2.1 Als acquisitiemanager wil ik per hoofdstuk een eerste concepttekst op basis van de tenderanalyse zodat het team nooit met een leeg vel begint.", 8),
+    s("st-2-2", "schrijf", "2.2 Als communicatiemanager wil ik dat alle teksten in de Blauwhoed tone-of-voice worden geschreven zodat elke inzending herkenbaar en consistent klinkt.", 5),
+    s("st-2-3", "schrijf", "2.3 Als acquisitiemanager wil ik een krachtige samenvatting (1-pager) van onze inzending zodat beslissers de kernboodschap in één oogopslag begrijpen.", 3),
+    s("st-2-4", "schrijf", "2.4 Als projectleider wil ik eigen aantekeningen en losse bullets kunnen laten uitwerken tot lopende tekst zodat mijn inhoudelijke kennis snel op papier staat.", 5),
+    s("st-2-5", "schrijf", "2.5 Als redacteur wil ik bestaande tekst kunnen laten herschrijven (korter, scherper, andere doelgroep) zodat aanpassen minder tijd kost dan zelf herschrijven.", 5),
+    s("st-2-6", "schrijf", "2.6 Als acquisitiemanager wil ik dat teksten aantoonbaar aansluiten op de gunningscriteria en de taal van de leidraad zodat de jury onze antwoorden makkelijk herkent.", 5),
+    s("st-2-7", "schrijf", "2.7 Als redacteur wil ik meerdere varianten van een passage kunnen opvragen zodat ik de sterkste versie kan kiezen.", 3),
+    s("st-2-8", "schrijf", "2.8 Als acquisitiemanager wil ik dat onze kernboodschappen consequent terugkomen in alle hoofdstukken zodat de inzending één verhaal vertelt.", 5),
+    s("st-2-9", "schrijf", "2.9 Als redacteur wil ik een taal- en stijlcontrole (spelling, consistent begrippenkader) zodat de eindredactie minder tijd kost.", 3),
+    s("st-2-10", "schrijf", "2.10 Als projectleider wil ik dat teksten automatisch binnen de pagina- of woordlimiet van de leidraad blijven zodat we niet op het laatst moeten schrappen.", 3),
+    s("st-2-11", "schrijf", "2.11 Als acquisitiemanager wil ik winnende teksten uit eerdere tenders als vertrekpunt kunnen gebruiken zodat bewezen materiaal niet opnieuw bedacht hoeft te worden.", 5),
+    s("st-2-12", "schrijf", "2.12 Als gebruiker wil ik feedback kunnen geven op gegenereerde teksten zodat de agent steeds beter aanvoelt wat wij goed vinden.", 3),
     // Epic 3: Structuur-agent
-    s("st-3-1", "structuur", "3.1 Als projectmanager wil ik dat de Structuur-agent engineering-input (technische specs) en concept-input (visie) samenvoegt zodat het uiteindelijke document consistent is en niets mist.", 8),
-    s("st-3-2", "structuur", "3.2 Als redacteur wil ik dat de Structuur-agent een logische outline genereert op basis van tender-requirements zodat het team weet welke secties nodig zijn en in welke volgorde.", 5),
-    s("st-3-3", "structuur", "3.3 Als redacteur wil ik dat de Structuur-agent alle referenties in het document checkt (figuurnummers, paginaverwijzingen) zodat we geen broken links of foute verwijzingen hebben.", 3),
-    s("st-3-4", "structuur", "3.4 Als projectmanager wil ik dat de Structuur-agent me helpt tegenstrijdige input op te lossen met resolutie-opties zodat het eindresultaat coherent is.", 5),
+    s("st-3-1", "structuur", "3.1 Als projectleider wil ik een documentopzet (hoofdstukindeling) op basis van de tenderleidraad zodat het team weet welke onderdelen nodig zijn en in welke volgorde.", 5),
+    s("st-3-2", "structuur", "3.2 Als projectleider wil ik losse input van verschillende disciplines (stedenbouw, techniek, financiën) laten samenvoegen tot één document zodat niets verloren gaat.", 8),
+    s("st-3-3", "structuur", "3.3 Als projectleider wil ik dat tegenstrijdige input wordt gesignaleerd met keuzeopties zodat wij bewust beslissen in plaats van dat er stilzwijgend wordt gekozen.", 5),
+    s("st-3-4", "structuur", "3.4 Als projectleider wil ik zien welke onderdelen nog ontbreken ten opzichte van de eisen zodat ik gericht kan uitvragen bij het team.", 5),
+    s("st-3-5", "structuur", "3.5 Als redacteur wil ik dat de rode draad van het verhaal wordt bewaakt over alle hoofdstukken heen zodat het document als één geheel leest.", 5),
+    s("st-3-6", "structuur", "3.6 Als redacteur wil ik dat verwijzingen, figuurnummers en paginaverwijzingen automatisch kloppen zodat er geen fouten in de inzending sluipen.", 3),
+    s("st-3-7", "structuur", "3.7 Als projectleider wil ik per discipline kunnen volgen wie welke input nog moet aanleveren zodat ik op tijd kan bijsturen.", 3),
+    s("st-3-8", "structuur", "3.8 Als projectleider wil ik het document eenvoudig kunnen laten herstructureren als de leidraad wijzigt (bijv. na de nota van inlichtingen) zodat we snel kunnen schakelen.", 5),
+    s("st-3-9", "structuur", "3.9 Als redacteur wil ik dat dubbelingen worden gesignaleerd en samengevoegd zodat het document compact blijft.", 3),
+    s("st-3-10", "structuur", "3.10 Als communicatiemanager wil ik dat het document automatisch in de Blauwhoed-huisstijl en het gevraagde indieningsformat staat zodat de vormgeving geen nawerk oplevert.", 5),
+    s("st-3-11", "structuur", "3.11 Als acquisitiemanager wil ik per hoofdstuk een korte leeswijzer of samenvatting zodat de jury snel de kern van elk onderdeel ziet.", 3),
+    s("st-3-12", "structuur", "3.12 Als projectleider wil ik het samengestelde document kunnen exporteren (Word/PDF) zodat we het direct kunnen indienen of intern kunnen reviewen.", 3),
     // Epic 4: Toets-agent
-    s("st-4-1", "toets", "4.1 Als projectmanager wil ik dat de Toets-agent checkt of alle tender-eisen gedekt zijn in ons concept zodat we geen essentiële requirement missen.", 5),
-    s("st-4-2", "toets", "4.2 Als acquisitiemanager wil ik dat de Toets-agent door jury-ogen beoordeelt of ons concept overtuigend is (technisch, commercieel, innovatie, risico, team) zodat ik weet of we kunnen winnen.", 8),
-    s("st-4-3", "toets", "4.3 Als communicatiemanager wil ik dat de Toets-agent controleert of onze messaging consistent en sterk is zodat we één heldere boodschap afgeven.", 5),
-    s("st-4-4", "toets", "4.4 Als jurist/projectmanager wil ik dat de Toets-agent alle risico's en aannames in ons concept flagt met mitigatie-suggesties zodat we ze kunnen mitigeren voordat we indienen.", 5),
+    s("st-4-1", "toets", "4.1 Als projectleider wil ik een volledigheidscheck van ons concept tegen alle eisen uit de leidraad zodat we geen enkele eis over het hoofd zien.", 5),
+    s("st-4-2", "toets", "4.2 Als acquisitiemanager wil ik per gunningscriterium een beoordeling met score zodat ik weet waar we sterk staan en waar we punten laten liggen.", 5),
+    s("st-4-3", "toets", "4.3 Als acquisitiemanager wil ik dat het concept door de ogen van de jury wordt beoordeeld zodat we weten of ons verhaal overtuigt.", 8),
+    s("st-4-4", "toets", "4.4 Als redacteur wil ik dat wordt getoetst of onze claims onderbouwd zijn (met cijfers, referenties of voorbeelden) zodat het verhaal geloofwaardig is.", 5),
+    s("st-4-5", "toets", "4.5 Als communicatiemanager wil ik dat de consistentie van onze boodschap door het hele document wordt gecontroleerd zodat we één helder verhaal afgeven.", 3),
+    s("st-4-6", "toets", "4.6 Als acquisitiemanager wil ik dat ons concept wordt vergeleken met lessen uit eerdere juryrapporten zodat we leren van wat eerder won of verloor.", 5),
+    s("st-4-7", "toets", "4.7 Als projectleider wil ik dat risico's en aannames in ons concept worden gesignaleerd met suggesties zodat we ze kunnen oplossen vóór indiening.", 5),
+    s("st-4-8", "toets", "4.8 Als projectleider wil ik per hoofdstuk concreet verbeteradvies (niet alleen een score) zodat het team direct aan de slag kan.", 5),
+    s("st-4-9", "toets", "4.9 Als projectleider wil ik na het verwerken van feedback opnieuw kunnen toetsen zodat ik zie of het concept daadwerkelijk beter wordt.", 3),
+    s("st-4-10", "toets", "4.10 Als acquisitiemanager wil ik vlak voor indiening een eindcheck (compleetheid, limieten, vormvereisten) zodat we met vertrouwen kunnen indienen.", 3),
+    s("st-4-11", "toets", "4.11 Als acquisitiemanager wil ik het toetsrapport kunnen delen met het managementteam zodat de besluitvorming over indienen goed onderbouwd is.", 3),
+    s("st-4-12", "toets", "4.12 Als acquisitiemanager wil ik zelf accenten kunnen meegeven (waar extra streng op toetsen) zodat de toets aansluit bij wat voor deze tender doorslaggevend is.", 3),
     // Epic 5: Juridische-agent
-    s("st-5-1", "juridisch", "5.1 Als jurist wil ik dat de Juridische-agent alle clausules in ons contract scant op juridische risico's zodat ik snel weet waar rode vlaggen liggen.", 8),
-    s("st-5-2", "juridisch", "5.2 Als jurist/acquisitiemanager wil ik dat de Juridische-agent checkt of ons contract aansluit op de tendervoorwaarden zodat we geen risico op breaches lopen.", 5),
-    s("st-5-3", "juridisch", "5.3 Als jurist/projectmanager wil ik dat de Juridische-agent teaming-overeenkomsten en subcontractor-agreements checkt zodat we geen exposure hebben binnen ons partnership.", 5),
-    s("st-5-4", "juridisch", "5.4 Als jurist/OMT wil ik dat de Juridische-agent een compliance-matrix bouwt (tender-requirement → contracttekst → eigenaar/garantsteller) zodat alles traceerbaar is.", 5),
+    s("st-5-1", "juridisch", "5.1 Als jurist wil ik een conceptcontract kunnen laten scannen op risicovolle clausules zodat ik direct zie waar de rode vlaggen zitten.", 8),
+    s("st-5-2", "juridisch", "5.2 Als jurist wil ik dat de agent onze vastgelegde 'non-negotiables' bewaakt zodat onacceptabele voorwaarden nooit onopgemerkt blijven.", 5),
+    s("st-5-3", "juridisch", "5.3 Als jurist wil ik dat afwijkingen van de Blauwhoed-standaarden worden gesignaleerd met verwijzing naar het artikel zodat ik gericht kan beoordelen.", 5),
+    s("st-5-4", "juridisch", "5.4 Als jurist wil ik per bevinding een risico-inschatting (hoog/midden/laag) zodat ik mijn tijd aan de belangrijkste punten besteed.", 3),
+    s("st-5-5", "juridisch", "5.5 Als acquisitiemanager wil ik per bevinding een begrijpelijke uitleg in gewone taal zodat ook niet-juristen de risico's snappen.", 3),
+    s("st-5-6", "juridisch", "5.6 Als jurist wil ik tekstsuggesties voor alternatieve clausules zodat ik sneller een tegenvoorstel kan doen.", 5),
+    s("st-5-7", "juridisch", "5.7 Als jurist wil ik dat wordt gecheckt of het contract aansluit op de tendervoorwaarden zodat we geen tegenstrijdige verplichtingen aangaan.", 5),
+    s("st-5-8", "juridisch", "5.8 Als jurist wil ik ook samenwerkings- en combinatieovereenkomsten kunnen laten checken zodat we binnen partnerships geen onnodige risico's lopen.", 5),
+    s("st-5-9", "juridisch", "5.9 Als jurist wil ik een overzicht dat elke tendereis koppelt aan de contracttekst en een eigenaar zodat alle verplichtingen traceerbaar zijn.", 5),
+    s("st-5-10", "juridisch", "5.10 Als jurist wil ik twee contractversies kunnen vergelijken met een overzicht van de wijzigingen zodat ik onderhandelingsrondes snel kan beoordelen.", 3),
+    s("st-5-11", "juridisch", "5.11 Als jurist wil ik de bevindingen als leesbaar rapport kunnen delen zodat het besproken kan worden met de wederpartij of het managementteam.", 3),
+    s("st-5-12", "juridisch", "5.12 Als jurist wil ik zelf clausules kunnen toevoegen aan de rode-vlaggenlijst zodat de agent meegroeit met onze ervaring.", 3),
     // Epic 6: Learning-agent
-    s("st-6-1", "learning", "6.1 Als acquisitiemanager wil ik dat de Learning-agent automatisch win/loss-data verzamelt en analyseert zodat we leren van elk tender, gewonnen of verloren.", 5),
-    s("st-6-2", "learning", "6.2 Als acquisitiemanager wil ik dat de Learning-agent een doorzoekbare database bouwt van alle eerdere tenders zodat ik snel kan zien of we zoiets eerder hebben gedaan.", 8),
-    s("st-6-3", "learning", "6.3 Als projectmanager wil ik dat de Learning-agent de performance van elke agent trackt zodat we weten waar kwaliteitsverbeteringen nodig zijn.", 5),
-    s("st-6-4", "learning", "6.4 Als projectmanager wil ik inzicht in welke teamcombinaties succesvol zijn zodat ik beter kan staffen op tenders.", 5),
-    s("st-6-5", "learning", "6.5 Als agent wil ik feedback krijgen op mijn output (per agent, verwerkt in retraining) zodat ik continu verbeter.", 5),
+    s("st-6-1", "learning", "6.1 Als acquisitiemanager wil ik per tender vastleggen of we gewonnen of verloren hebben zodat we een compleet beeld opbouwen van onze prestaties.", 3),
+    s("st-6-2", "learning", "6.2 Als acquisitiemanager wil ik een analyse van waaróm we een tender wonnen of verloren (o.a. uit juryrapporten) zodat we leren van elke inzending.", 5),
+    s("st-6-3", "learning", "6.3 Als acquisitiemanager wil ik een doorzoekbare kennisbank van al onze eerdere tenders zodat ik snel kan zien of we iets vergelijkbaars eerder deden.", 8),
+    s("st-6-4", "learning", "6.4 Als projectleider wil ik bij een nieuwe tender automatisch vergelijkbare eerdere projecten aangereikt krijgen zodat we bewezen materiaal hergebruiken.", 5),
+    s("st-6-5", "learning", "6.5 Als acquisitiemanager wil ik trends zien in juryfeedback over meerdere tenders zodat we structurele sterktes en zwaktes herkennen.", 5),
+    s("st-6-6", "learning", "6.6 Als directielid wil ik een dashboard met kerncijfers (winrate, doorlooptijd, aantal reviewrondes) zodat ik de ontwikkeling kan volgen.", 5),
+    s("st-6-7", "learning", "6.7 Als projectleider wil ik zien hoe elke agent presteert (kwaliteit van output, benodigde correcties) zodat we weten waar verbetering nodig is.", 5),
+    s("st-6-8", "learning", "6.8 Als gebruiker wil ik op één plek feedback kunnen geven op de output van elke agent zodat verbeterpunten niet verloren gaan.", 3),
+    s("st-6-9", "learning", "6.9 Als gebruiker wil ik terugzien wat er met mijn feedback is gebeurd zodat ik weet dat mijn input effect heeft.", 3),
+    s("st-6-10", "learning", "6.10 Als acquisitiemanager wil ik inzicht in de succesfactoren van winnende inzendingen zodat we die bewust kunnen inzetten bij nieuwe tenders.", 5),
+    s("st-6-11", "learning", "6.11 Als directielid wil ik een periodieke verbeterrapportage zodat zichtbaar is hoe de agents en onze tenderaanpak vooruitgaan.", 3),
+    s("st-6-12", "learning", "6.12 Als acquisitiemanager wil ik samen met AI-Group vastleggen welke doelen 'beter' definiëren (bijv. winrate, tijdwinst) zodat we op de juiste dingen sturen.", 3),
     // Epic 7: AI-Group Academy (e-learning)
-    s("st-7-1", "academy", "7.1 Als nieuwe Blauwhoed-medewerker wil ik een korte guided tour door het platform (5-10 min) zodat ik meteen kan beginnen.", 3),
-    s("st-7-2", "academy", "7.2 Als acquisitiemanager wil ik per agent een deep-dive course (15-20 min) zodat ik begrijp hoe elke agent werkt en er maximale waarde uit haal.", 5),
-    s("st-7-3", "academy", "7.3 Als projectmanager wil ik een masterclass agentic werken (30 min) zodat ik strategisch kan meedenken over de implementatie.", 3),
-    s("st-7-4", "academy", "7.4 Als power user wil ik leren hoe ik agents beter kan instrueren via prompts zodat ik betere output krijg.", 3),
-    s("st-7-5", "academy", "7.5 Als compliance/security officer wil ik dat teamleden verplichte training krijgen in data-handling zodat we GDPR/compliance-risico's minimaliseren.", 3),
-    s("st-7-6", "academy", "7.6 Als gebruiker wil ik snel hulp kunnen vinden wanneer iets niet werkt (FAQ, kennisbank, support met SLA) zodat ik niet vast kom te zitten.", 3),
+    s("st-7-1", "academy", "7.1 Als nieuwe medewerker wil ik een korte rondleiding door het platform (5-10 min) zodat ik meteen aan de slag kan.", 3),
+    s("st-7-2", "academy", "7.2 Als gebruiker wil ik per agent een verdiepende module (15-20 min) zodat ik begrijp wat elke agent kan en er maximale waarde uit haal.", 5),
+    s("st-7-3", "academy", "7.3 Als gebruiker wil ik op mijn eigen tempo kunnen leren en mijn voortgang bewaard zien zodat ik kan stoppen en later verdergaan.", 3),
+    s("st-7-4", "academy", "7.4 Als manager wil ik een masterclass over werken met AI-agents zodat ik strategisch kan meedenken over de inzet ervan.", 3),
+    s("st-7-5", "academy", "7.5 Als gebruiker wil ik leren hoe ik agents goede instructies geef zodat ik betere resultaten krijg.", 3),
+    s("st-7-6", "academy", "7.6 Als gebruiker wil ik kunnen oefenen met een voorbeeldtender in een veilige omgeving zodat ik fouten kan maken zonder gevolgen.", 5),
+    s("st-7-7", "academy", "7.7 Als gebruiker wil ik korte video's en stappenplannen per taak zodat ik snel het antwoord vind op 'hoe doe ik dit?'.", 3),
+    s("st-7-8", "academy", "7.8 Als medewerker wil ik per module een korte kennistoets met certificaat zodat ik kan aantonen dat ik het platform beheers.", 3),
+    s("st-7-9", "academy", "7.9 Als beheerder wil ik zien wie welke modules heeft afgerond zodat ik weet of het team klaar is om met het platform te werken.", 3),
+    s("st-7-10", "academy", "7.10 Als beheerder wil ik dat medewerkers een verplichte module over veilig omgaan met vertrouwelijke data volgen zodat we zorgvuldig met tenderinformatie omgaan.", 3),
+    s("st-7-11", "academy", "7.11 Als gebruiker wil ik een doorzoekbare FAQ en kennisbank zodat ik zelf antwoorden vind zonder te hoeven wachten op support.", 3),
+    s("st-7-12", "academy", "7.12 Als gebruiker wil ik bij nieuwe functies een korte uitleg krijgen zodat ik nieuwe mogelijkheden direct kan benutten.", 2),
   ];
 }
 
