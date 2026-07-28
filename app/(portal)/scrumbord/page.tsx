@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AGENTS, COLUMNS } from "@/lib/content";
 import { fmtShort } from "@/lib/dates";
 import { getState, type PortalState } from "@/lib/store";
-import { RiskBadge } from "@/components/ui";
+import { RiskBadge, StoryProgress } from "@/components/ui";
 import PageHeader from "@/components/PageHeader";
 import { AgentIcon } from "@/components/art";
 import { currentRole } from "@/lib/auth";
@@ -80,6 +80,8 @@ export default async function Scrumbord() {
   const state = await getState();
   const role = await currentRole();
   const isAdmin = role === "admin";
+  const points = (list: typeof state.stories) => list.reduce((sum, s) => sum + (s.points ?? 0), 0);
+  const doing = state.stories.filter((s) => s.status === "doing").length;
 
   return (
     <>
@@ -88,6 +90,18 @@ export default async function Scrumbord() {
         intro="Acht epics — het platform-fundament, zes agents en de Academy — van backlog tot live. AI-Group werkt hier met taken per epic; klik op een epic voor detail, taken en feedback. Reacties en vragen zijn altijd welkom."
         image="/img/harmonie.jpg"
       />
+
+      <div className="card planner-info">
+        <strong>Voortgang hele project</strong>
+        <span style={{ color: "var(--ink-2)" }}>
+          {" "}— alle user stories over de acht epics samen ·{" "}
+          {points(state.stories.filter((s) => s.status === "done"))}/{points(state.stories)} punten klaar
+          {doing > 0 && <> · {points(state.stories.filter((s) => s.status === "doing"))} punten onderhanden</>}
+        </span>
+        <div style={{ marginTop: 10 }}>
+          <StoryProgress stories={state.stories} />
+        </div>
+      </div>
 
       {/* Desktop: klassiek bord met 6 kolommen naast elkaar */}
       <div className="kanban desktop-only">

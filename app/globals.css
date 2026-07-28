@@ -399,9 +399,18 @@ tbody tr:hover { background: rgba(42, 120, 214, 0.05); }
   outline: 2px dashed var(--brand); outline-offset: -2px;
   background: rgba(42, 120, 214, 0.06);
 }
-.story-card.grabbable { cursor: grab; }
+.story-card.grabbable { cursor: grab; user-select: none; }
 .story-card.grabbable:active { cursor: grabbing; }
 .story-card.dragging { opacity: 0.4; }
+
+/* Pointer-slepen: zwevende kaart die de cursor volgt */
+.drag-ghost {
+  position: fixed; z-index: 90; pointer-events: none; margin: 0;
+  border-color: var(--brand); opacity: 0.95; transform: rotate(1.5deg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+body.dragging-story { cursor: grabbing; user-select: none; }
+body.dragging-story .story-card { cursor: grabbing; }
 .story-card .cardhead { margin-bottom: 4px; }
 .story-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
 .mini-btn {

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { moveStoryTo, deleteStoryById, updateStoryDetails } from "@/app/actions";
 import { AgentIcon } from "./art";
+import { StoryProgress } from "./ui";
 import { fmtShort } from "@/lib/dates";
 import type { Story, StoryStatus } from "@/lib/store";
 import type { Sprint } from "@/lib/content";
@@ -17,6 +18,8 @@ const STATUS_COLS: { key: StoryStatus; label: string }[] = [
   { key: "doing", label: "In uitvoering" },
   { key: "done", label: "Klaar" },
 ];
+
+type DropZone = "backlog" | StoryStatus;
 
 /**
  * Story-dialoog: bekijken (iedereen) en bewerken incl. toelichting (beheerder).
@@ -148,15 +151,69 @@ export default function SprintPlanner({
   const [selected, setSelected] = useState(
     sprints.some((s) => s.id === initialSprintId) ? (initialSprintId as string) : activeId
   );
-  const [dragId, setDragId] = useState<string | null>(null);
   const [hoverZone, setHoverZone] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Slepen met pointer events: indrukken en bewegen = direct slepen (geen
+  // native HTML5-drag met zijn drempel en grijze snapshot). Een klik zonder
+  // beweging opent de story-dialoog. Op touch-apparaten zijn er verplaatsknoppen.
+  const [drag, setDrag] = useState<{ id: string; x: number; y: number; w: number } | null>(null);
+  const pressRef = useRef<{ id: string; x: number; y: number; w: number } | null>(null);
+  const didDragRef = useRef(false);
+  const dropRef = useRef<(id: string, zone: DropZone) => void>(() => {});
+  dropRef.current = (id, zone) => {
+    if (zone === "backlog") apply(id, null, "todo");
+    else apply(id, selected, zone);
+  };
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const zoneAt = (x: number, y: number): DropZone | null => {
+      const el = document
+        .elementsFromPoint(x, y)
+        .find((n): n is HTMLElement => n instanceof HTMLElement && !!n.dataset.dropZone);
+      return (el?.dataset.dropZone as DropZone | undefined) ?? null;
+    };
+    const onMove = (e: PointerEvent) => {
+      const press = pressRef.current;
+      if (!press) return;
+      if (!didDragRef.current && Math.hypot(e.clientX - press.x, e.clientY - press.y) < 5) return;
+      didDragRef.current = true;
+      setDrag({ id: press.id, x: e.clientX, y: e.clientY, w: press.w });
+      setHoverZone(zoneAt(e.clientX, e.clientY));
+    };
+    const onUp = (e: PointerEvent) => {
+      const press = pressRef.current;
+      pressRef.current = null;
+      if (!press || !didDragRef.current) return;
+      const zone = zoneAt(e.clientX, e.clientY);
+      setDrag(null);
+      setHoverZone(null);
+      if (zone) dropRef.current(press.id, zone);
+      // Nog even 'gedragd' blijven zodat de click na het loslaten de dialoog niet opent.
+      setTimeout(() => {
+        didDragRef.current = false;
+      }, 0);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [isAdmin]);
+
+  useEffect(() => {
+    document.body.classList.toggle("dragging-story", drag !== null);
+    return () => document.body.classList.remove("dragging-story");
+  }, [drag]);
 
   const sprint = sprints.find((s) => s.id === selected)!;
   const backlog = stories.filter((s) => !s.sprintId);
   const inSprint = stories.filter((s) => s.sprintId === selected);
   const openStory = stories.find((s) => s.id === openId) ?? null;
+  const dragStory = drag ? stories.find((s) => s.id === drag.id) ?? null : null;
   const epicName = (id: string) =>
     (epics.find((e) => e.id === id)?.name ?? id).replace("-agent", "");
   const points = (list: Story[]) => list.reduce((sum, s) => sum + (s.points ?? 0), 0);
@@ -202,45 +259,22 @@ export default function SprintPlanner({
     });
   }
 
-  function dropOn(zone: "backlog" | StoryStatus) {
-    if (!dragId) return;
-    if (zone === "backlog") apply(dragId, null, "todo");
-    else apply(dragId, selected, zone);
-    setDragId(null);
-    setHoverZone(null);
-  }
-
-  const zoneProps = (zone: string, onDrop: () => void) =>
-    isAdmin
-      ? {
-          onDragOver: (e: React.DragEvent) => {
-            e.preventDefault();
-            if (hoverZone !== zone) setHoverZone(zone);
-          },
-          onDragLeave: (e: React.DragEvent) => {
-            if (e.currentTarget === e.target) setHoverZone(null);
-          },
-          onDrop: (e: React.DragEvent) => {
-            e.preventDefault();
-            onDrop();
-          },
-        }
-      : {};
-
   function StoryCard({ story, inBacklog }: { story: Story; inBacklog: boolean }) {
     return (
       <div
-        className={`kanban-card story-card${dragId === story.id ? " dragging" : ""}${isAdmin ? " grabbable" : ""}`}
-        draggable={isAdmin}
-        onDragStart={(e) => {
-          e.dataTransfer.setData("text/plain", story.id);
-          e.dataTransfer.effectAllowed = "move";
-          setDragId(story.id);
+        className={`kanban-card story-card${drag?.id === story.id ? " dragging" : ""}${isAdmin ? " grabbable" : ""}`}
+        onPointerDown={(e) => {
+          if (!isAdmin || e.pointerType !== "mouse" || e.button !== 0) return;
+          if ((e.target as HTMLElement).closest(".story-actions")) return;
+          didDragRef.current = false;
+          pressRef.current = {
+            id: story.id,
+            x: e.clientX,
+            y: e.clientY,
+            w: (e.currentTarget as HTMLElement).offsetWidth,
+          };
         }}
-        onDragEnd={() => {
-          setDragId(null);
-          setHoverZone(null);
-        }}
+        onDragStart={(e) => e.preventDefault()}
       >
         <div className="cardhead">
           <AgentIcon id={story.agentId} size={15} />
@@ -251,7 +285,10 @@ export default function SprintPlanner({
           type="button"
           className="story-title story-open"
           title="Story openen"
-          onClick={() => setOpenId(story.id)}
+          onClick={() => {
+            if (didDragRef.current) return;
+            setOpenId(story.id);
+          }}
         >
           {story.title}
           {story.description && <span className="has-note" title="Heeft toelichting"> ≡</span>}
@@ -321,12 +358,17 @@ export default function SprintPlanner({
             {" "}· {points(inSprint.filter((s) => s.status === "done"))}/{points(inSprint)} punten klaar
           </span>
         )}
+        {inSprint.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <StoryProgress stories={inSprint} />
+          </div>
+        )}
       </div>
 
       <div className="planner-grid">
         <div
           className={`kanban-col planner-backlog${hoverZone === "backlog" ? " drop-hover" : ""}`}
-          {...zoneProps("backlog", () => dropOn("backlog"))}
+          data-drop-zone="backlog"
         >
           <h3>Backlog · {backlog.length}</h3>
           <div className="hint">
@@ -359,7 +401,7 @@ export default function SprintPlanner({
             <div
               key={col.key}
               className={`kanban-col${hoverZone === col.key ? " drop-hover" : ""}`}
-              {...zoneProps(col.key, () => dropOn(col.key))}
+              data-drop-zone={col.key}
             >
               <h3>
                 {col.label} · {items.length}
@@ -380,6 +422,20 @@ export default function SprintPlanner({
           );
         })}
       </div>
+
+      {drag && dragStory && (
+        <div
+          className="kanban-card story-card drag-ghost"
+          style={{ left: drag.x + 10, top: drag.y + 8, width: drag.w }}
+        >
+          <div className="cardhead">
+            <AgentIcon id={dragStory.agentId} size={15} />
+            <span className="story-epic">{epicName(dragStory.agentId)}</span>
+            {dragStory.points ? <span className="points">{dragStory.points} pt</span> : null}
+          </div>
+          <div className="story-title">{dragStory.title}</div>
+        </div>
+      )}
 
       {openStory && (
         <StoryDialog
