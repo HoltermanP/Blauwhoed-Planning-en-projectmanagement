@@ -310,6 +310,7 @@ export async function addStory(formData: FormData) {
   await requireAdmin();
   const agentId = String(formData.get("agentId") ?? "");
   const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
   const pointsRaw = Number(formData.get("points"));
   if (!agentId || !title) return;
 
@@ -318,10 +319,34 @@ export async function addStory(formData: FormData) {
     id: Math.random().toString(36).slice(2, 10),
     agentId,
     title,
+    description: description || undefined,
     points: Number.isFinite(pointsRaw) && pointsRaw > 0 ? pointsRaw : undefined,
     sprintId: null,
     status: "todo",
   });
+  await saveState(state);
+  revalidateSprints();
+}
+
+/** Titel, toelichting en punten van een story bijwerken (vanuit de story-dialoog). */
+export async function updateStoryDetails(
+  storyId: string,
+  details: { title: string; description: string; points: number | null }
+) {
+  await requireAdmin();
+  const title = details.title.trim();
+  const description = details.description.trim();
+  if (!storyId || !title) return;
+
+  const state = await getState();
+  const story = state.stories.find((s) => s.id === storyId);
+  if (!story) return;
+  story.title = title;
+  story.description = description || undefined;
+  story.points =
+    details.points !== null && Number.isFinite(details.points) && details.points > 0
+      ? details.points
+      : undefined;
   await saveState(state);
   revalidateSprints();
 }

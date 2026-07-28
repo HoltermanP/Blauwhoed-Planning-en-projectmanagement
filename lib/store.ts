@@ -74,6 +74,8 @@ export interface Story {
   id: string;
   agentId: string; // epic
   title: string;
+  /** Uitgebreidere toelichting (context, acceptatiecriteria); optioneel. */
+  description?: string;
   points?: number;
   sprintId: string | null; // null = backlog
   status: StoryStatus;
@@ -85,7 +87,7 @@ export interface PortalState {
   answers: Record<string, Answer>;
   tasks: Task[];
   stories: Story[];
-  /** Bij een lagere opgeslagen versie wordt de backlog vervangen door de actuele seeds. */
+  /** Bij een lagere opgeslagen versie worden de seed-teksten ververst; zie mergeStories. */
   storySeedVersion?: number;
   questions: Question[];
   docs: DocItem[];
@@ -241,6 +243,34 @@ function seedStories(): Story[] {
   ];
 }
 
+/**
+ * Backlog-seeds kunnen wijzigen (hogere STORY_SEED_VERSION), maar wat de
+ * gebruiker zelf heeft gedaan blijft daarbij altijd behouden: sprint-toewijzing,
+ * status en toelichting per story (gematcht op id), plus handmatig toegevoegde
+ * stories (id zonder "st-"-prefix). Een story verandert dus alleen van status
+ * als de gebruiker dat zelf doet. Seed-stories die niet meer bestaan vervallen.
+ */
+function mergeStories(saved: Story[] | undefined, seeds: Story[], savedVersion: number): Story[] {
+  if (!saved) return seeds;
+  if (savedVersion >= STORY_SEED_VERSION) {
+    // Zelfde seeds: alleen stories van later toegevoegde epics aanvullen.
+    const knownAgents = new Set(saved.map((s) => s.agentId));
+    return [...saved, ...seeds.filter((s) => !knownAgents.has(s.agentId))];
+  }
+  const savedById = new Map(saved.map((s) => [s.id, s]));
+  const fromSeeds = seeds.map((seed) => {
+    const old = savedById.get(seed.id);
+    if (!old) return seed;
+    return {
+      ...seed,
+      sprintId: old.sprintId,
+      status: old.status,
+      description: old.description ?? seed.description,
+    };
+  });
+  return [...fromSeeds, ...saved.filter((s) => !s.id.startsWith("st-"))];
+}
+
 function mergeWithDefaults(raw: Partial<PortalState> | null): PortalState {
   const base = defaultState();
   if (!raw) return base;
@@ -251,15 +281,12 @@ function mergeWithDefaults(raw: Partial<PortalState> | null): PortalState {
     const knownAgents = new Set(saved.map((i) => i.agentId));
     return [...saved, ...seeds.filter((i) => !knownAgents.has(i.agentId))];
   };
-  // Opgeslagen backlog van een oudere seed-versie wordt volledig vervangen door
-  // de actuele seeds (incl. sprint-toewijzingen — de nummering is dan niet meer geldig).
-  const storiesCurrent = (raw.storySeedVersion ?? 0) >= STORY_SEED_VERSION;
   return {
     epics: { ...base.epics, ...(raw.epics ?? {}) },
     comments: raw.comments ?? [],
     answers: { ...base.answers, ...(raw.answers ?? {}) },
     tasks: withSeeds(raw.tasks, base.tasks),
-    stories: storiesCurrent ? withSeeds(raw.stories, base.stories) : base.stories,
+    stories: mergeStories(raw.stories, base.stories, raw.storySeedVersion ?? 0),
     storySeedVersion: STORY_SEED_VERSION,
     // Zodra er opgeslagen vragen/documenten zijn, zijn die volledig leidend (CRUD door beheerder).
     questions: raw.questions ?? base.questions,

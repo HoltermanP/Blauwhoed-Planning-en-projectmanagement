@@ -437,6 +437,43 @@ tbody tr:hover { background: rgba(42, 120, 214, 0.05); }
 .kanban-card .cardhead .points { margin-left: auto; }
 .kanban-card .story-title { margin-bottom: 4px; }
 
+/* Klikbare storytitel (opent de story-dialoog) */
+.story-open {
+  display: block; width: 100%; text-align: left; padding: 0; margin: 0;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  color: var(--ink);
+}
+.story-open:hover { color: var(--brand-ink); }
+.story-open .has-note { color: var(--brand); font-weight: 700; }
+
+/* Voortgang per epic o.b.v. user stories: klaar (vol) + onderhanden (licht) */
+.story-progress { display: grid; gap: 5px; min-width: 130px; }
+.story-progress .progress { margin-top: 0; }
+.progress-stack { display: flex; }
+.progress-stack > div { border-radius: 0; }
+.progress-stack .seg-doing { background: var(--phase-build); opacity: 0.55; }
+.story-progress-text { font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+
+/* Story-dialoog */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(10, 16, 26, 0.5);
+  display: flex; align-items: center; justify-content: center; padding: 18px;
+}
+.modal {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  width: 100%; max-width: 580px; max-height: 85vh; overflow-y: auto;
+  padding: 20px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+.modal h3 { margin: 0 0 6px; font-size: 16px; line-height: 1.4; }
+.modal .modal-sub {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 700; color: var(--ink-2); margin: 0 0 12px;
+}
+.modal .modal-sub svg { color: var(--brand); }
+.modal-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.modal-actions .btn { margin-top: 0; }
+
 /* ---------- Taken ---------- */
 .task { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--grid); }
 .task:last-of-type { border-bottom: none; }

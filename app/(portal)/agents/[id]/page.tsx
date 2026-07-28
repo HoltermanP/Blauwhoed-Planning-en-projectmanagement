@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { COLUMNS, RISK_META, agentById } from "@/lib/content";
 import { fmt, fmtDateTime, todayISO } from "@/lib/dates";
 import { getState } from "@/lib/store";
-import { RiskBadge } from "@/components/ui";
+import { RiskBadge, StoryProgress } from "@/components/ui";
 import { AgentIcon } from "@/components/art";
 import PageHeader from "@/components/PageHeader";
 import { AGENTS } from "@/lib/content";
@@ -24,6 +24,8 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
   const comments = state.comments.filter((c) => c.agentId === agent.id);
   const tasks = state.tasks.filter((t) => t.agentId === agent.id);
   const doneCount = tasks.filter((t) => t.done).length;
+  const stories = state.stories.filter((s) => s.agentId === agent.id);
+  const storyPoints = (list: typeof stories) => list.reduce((sum, s) => sum + (s.points ?? 0), 0);
   const today = todayISO();
   const column = COLUMNS.find((c) => c.key === epic.column);
 
@@ -95,6 +97,19 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
             {agent.successCriteria.map((c) => <li key={c}>{c}</li>)}
           </ul>
         </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <h2 style={{ marginTop: 0 }}>Voortgang user stories</h2>
+        <StoryProgress stories={stories} />
+        {stories.length > 0 && (
+          <p style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 10, marginBottom: 0 }}>
+            {storyPoints(stories.filter((s) => s.status === "done"))} van {storyPoints(stories)} punten
+            gerealiseerd · {stories.filter((s) => s.status === "doing").length} story&rsquo;s onderhanden ·{" "}
+            {stories.filter((s) => !s.sprintId).length} nog in de backlog —{" "}
+            <Link href="/sprints">naar de sprintplanning</Link>
+          </p>
+        )}
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>

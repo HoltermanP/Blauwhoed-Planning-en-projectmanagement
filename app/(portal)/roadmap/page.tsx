@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AGENTS, PROJECT, SPRINTS, agentById } from "@/lib/content";
 import { daysBetween, fmt, fmtShort, todayISO } from "@/lib/dates";
 import { getState } from "@/lib/store";
-import { RiskBadge } from "@/components/ui";
+import { RiskBadge, StoryProgress } from "@/components/ui";
 import PageHeader from "@/components/PageHeader";
 import { AgentIcon } from "@/components/art";
 
@@ -198,6 +198,7 @@ export default async function Roadmap() {
               <th>Milestone</th>
               <th>Datum</th>
               <th>Status</th>
+              <th>User stories</th>
               <th>Afhankelijk van</th>
             </tr>
           </thead>
@@ -208,6 +209,9 @@ export default async function Roadmap() {
                 <td>{a.milestone.label}</td>
                 <td>{fmt(a.milestone.date)}</td>
                 <td><RiskBadge risk={state.epics[a.id].risk} /></td>
+                <td>
+                  <StoryProgress stories={state.stories.filter((s) => s.agentId === a.id)} />
+                </td>
                 <td style={{ fontSize: 13, color: "var(--ink-2)" }}>
                   {a.dependencies.length
                     ? a.dependencies.map((d) => agentById(d)?.name.replace("-agent", "")).join(", ")
@@ -235,6 +239,9 @@ export default async function Roadmap() {
               {a.dependencies.length > 0 && (
                 <> · afhankelijk van {a.dependencies.map((d) => agentById(d)?.name.replace("-agent", "")).join(", ")}</>
               )}
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <StoryProgress stories={state.stories.filter((s) => s.agentId === a.id)} />
             </div>
           </div>
         ))}

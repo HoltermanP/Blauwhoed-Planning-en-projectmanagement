@@ -1,5 +1,5 @@
 import { RISK_META, type Risk, type DocStatus } from "@/lib/content";
-import type { AnswerStatus } from "@/lib/store";
+import type { AnswerStatus, Story } from "@/lib/store";
 
 const RISK_CLASS: Record<Risk, string> = {
   "on-track": "badge-good",
@@ -14,6 +14,37 @@ export function RiskBadge({ risk }: { risk: Risk }) {
       <span className="dot" aria-hidden>{meta.icon}</span>
       {meta.label}
     </span>
+  );
+}
+
+/**
+ * Voortgang van een epic op basis van zijn user stories: gerealiseerd (klaar)
+ * en onderhanden (in uitvoering) ten opzichte van alle stories van die epic.
+ */
+export function StoryProgress({ stories }: { stories: Story[] }) {
+  const total = stories.length;
+  if (total === 0) {
+    return <span className="story-progress-text">Nog geen user stories</span>;
+  }
+  const done = stories.filter((s) => s.status === "done").length;
+  const doing = stories.filter((s) => s.status === "doing").length;
+  return (
+    <div className="story-progress" title={`${done} klaar · ${doing} onderhanden · ${total} totaal`}>
+      <div
+        className="progress progress-sm progress-stack"
+        role="progressbar"
+        aria-valuenow={done}
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-label={`${done} van ${total} user stories klaar`}
+      >
+        <div className="seg-done" style={{ width: `${(done / total) * 100}%` }} />
+        <div className="seg-doing" style={{ width: `${(doing / total) * 100}%` }} />
+      </div>
+      <span className="story-progress-text">
+        {done}/{total} klaar{doing > 0 && <> · {doing} onderhanden</>}
+      </span>
+    </div>
   );
 }
 

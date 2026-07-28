@@ -92,6 +92,13 @@ export default async function Sprints({
               placeholder="Als [rol] wil ik [functionaliteit] zodat [waarde]…"
               style={{ minHeight: 70 }}
             />
+            <label htmlFor="story-description">Toelichting (optioneel)</label>
+            <textarea
+              id="story-description"
+              name="description"
+              placeholder="Context, acceptatiecriteria of andere details…"
+              style={{ minHeight: 60 }}
+            />
             <button className="btn" type="submit">Toevoegen aan backlog</button>
           </form>
         </div>
