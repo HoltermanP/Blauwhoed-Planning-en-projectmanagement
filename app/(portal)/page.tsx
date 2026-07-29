@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AGENTS, COLUMNS, PROJECT, activeSprint, agentById } from "@/lib/content";
 import { daysBetween, fmt, fmtDateTime, progressPct, todayISO } from "@/lib/dates";
 import { getState } from "@/lib/store";
+import { currentRole } from "@/lib/auth";
 import { Progress, RiskBadge } from "@/components/ui";
 import PageHeader from "@/components/PageHeader";
 import { AgentIcon } from "@/components/art";
@@ -10,6 +11,8 @@ export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   const state = await getState();
+  const role = await currentRole();
+  const isAdmin = role === "admin";
   const today = todayISO();
 
   const totalDays = daysBetween(PROJECT.bouwStart, PROJECT.bouwEind) + 1;
@@ -115,19 +118,21 @@ export default async function Dashboard() {
         </table>
       </div>
 
-      <div className="grid-2" style={{ marginTop: 28 }}>
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Validatievragen</h2>
-          <p style={{ fontSize: 14, color: "var(--ink-2)" }}>
-            {answered} van {questions.length} beantwoord
-            {inProgress > 0 && <> · {inProgress} in behandeling</>}.
-            Input van Daphne &amp; Lise (OM Acquisitie) stuurt de designfase direct aan.
-          </p>
-          <Progress pct={questions.length ? Math.round((answered / questions.length) * 100) : 0} />
-          <p style={{ marginTop: 12 }}>
-            <Link href="/validatie">Naar de validatievragen →</Link>
-          </p>
-        </div>
+      <div className={isAdmin ? "grid-2" : undefined} style={{ marginTop: 28 }}>
+        {isAdmin && (
+          <div className="card">
+            <h2 style={{ marginTop: 0 }}>Validatievragen</h2>
+            <p style={{ fontSize: 14, color: "var(--ink-2)" }}>
+              {answered} van {questions.length} beantwoord
+              {inProgress > 0 && <> · {inProgress} in behandeling</>}.
+              Input van Daphne &amp; Lise (OM Acquisitie) stuurt de designfase direct aan.
+            </p>
+            <Progress pct={questions.length ? Math.round((answered / questions.length) * 100) : 0} />
+            <p style={{ marginTop: 12 }}>
+              <Link href="/validatie">Naar de validatievragen →</Link>
+            </p>
+          </div>
+        )}
         <div className="card">
           <h2 style={{ marginTop: 0 }}>Recente feedback</h2>
           {recentComments.length === 0 ? (
@@ -154,8 +159,13 @@ export default async function Dashboard() {
       <div className="notice">
         <strong>Snel naar:</strong>{" "}
         <Link href="/roadmap">Roadmap</Link> · <Link href="/scrumbord">Scrumbord</Link> ·{" "}
-        <Link href="/sprints">Sprintplanning</Link> · <Link href="/documenten">Documenten</Link> ·{" "}
-        <Link href="/sla">SLA &amp; Beheer</Link>
+        <Link href="/sprints">Sprintplanning</Link>
+        {isAdmin && (
+          <>
+            {" "}· <Link href="/documenten">Documenten</Link> ·{" "}
+            <Link href="/sla">SLA &amp; Beheer</Link>
+          </>
+        )}
       </div>
     </>
   );

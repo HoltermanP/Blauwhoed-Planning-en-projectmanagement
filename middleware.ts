@@ -10,6 +10,13 @@ export function middleware(req: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
+  // Alleen zichtbaar/bereikbaar voor AI-Group (beheerder).
+  const adminOnly = ["/validatie", "/documenten", "/sla"];
+  if (role === "client" && adminOnly.some((p) => pathname.startsWith(p))) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
   return NextResponse.next();
 }
 

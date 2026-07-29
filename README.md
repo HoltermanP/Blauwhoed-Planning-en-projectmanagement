@@ -16,7 +16,7 @@ Inloggen (demo-wachtwoorden, override via `.env`):
 | Rol | Wachtwoord (default) | Rechten |
 |---|---|---|
 | AI-Group (beheerder) | `aigroup-demo` | status/kolom/risico bijwerken, notities, antwoord-status |
-| Blauwhoed (klant) | `blauwhoed-demo` | alles inzien, validatievragen beantwoorden, feedback plaatsen |
+| Blauwhoed (klant) | `Blauwhoed-AI-2026` | inzien (zonder Validatievragen, Documenten en SLA & Beheer), feedback plaatsen |
 
 Zonder `DATABASE_URL` wordt state lokaal opgeslagen in `.data/state.json`.
 

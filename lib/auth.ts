@@ -9,7 +9,7 @@ export function adminPassword(): string {
 }
 
 export function clientPassword(): string {
-  return process.env.PORTAL_CLIENT_PASSWORD || "blauwhoed-demo";
+  return process.env.PORTAL_CLIENT_PASSWORD || "Blauwhoed-AI-2026";
 }
 
 export async function currentRole(): Promise<Role | null> {

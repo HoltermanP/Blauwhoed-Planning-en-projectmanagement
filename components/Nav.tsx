@@ -69,16 +69,17 @@ const LINKS = [
   { href: "/roadmap", label: "Roadmap", icon: "roadmap" },
   { href: "/scrumbord", label: "Scrumbord", icon: "scrumbord" },
   { href: "/sprints", label: "Sprints", icon: "sprints" },
-  { href: "/validatie", label: "Validatievragen", icon: "validatie" },
-  { href: "/documenten", label: "Documenten", icon: "documenten" },
-  { href: "/sla", label: "SLA & Beheer", icon: "sla" },
+  { href: "/validatie", label: "Validatievragen", icon: "validatie", adminOnly: true },
+  { href: "/documenten", label: "Documenten", icon: "documenten", adminOnly: true },
+  { href: "/sla", label: "SLA & Beheer", icon: "sla", adminOnly: true },
 ];
 
-export default function Nav() {
+export default function Nav({ role }: { role: "admin" | "client" | null }) {
   const pathname = usePathname();
+  const links = LINKS.filter((l) => !l.adminOnly || role === "admin");
   return (
     <nav>
-      {LINKS.map((l) => {
+      {links.map((l) => {
         const active = l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
         return (
           <Link key={l.href} href={l.href} className={active ? "active" : undefined}>

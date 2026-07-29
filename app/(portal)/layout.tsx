@@ -13,7 +13,7 @@ export default async function PortalLayout({ children }: { children: React.React
           Blauwhoed × AI-Group
         </div>
         <div className="tagline">Agentic Platform — Acquisitie</div>
-        <Nav />
+        <Nav role={role} />
         <div className="foot">
           <div className="rolebadge">
             {role === "admin" ? "AI-Group · beheerder" : "Blauwhoed · klant"}
